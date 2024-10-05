@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  # PostgreSQL Database Service
+  koi_db:
+    image: postgres:13-alpine
+    container_name: ShopKoi_DB
+    environment:
+      POSTGRES_DB: shop-koi
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - koi-network
+volumes:
+  db_data:
+networks:
+  koi-network:
