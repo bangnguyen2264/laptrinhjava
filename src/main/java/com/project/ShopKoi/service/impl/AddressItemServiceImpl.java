@@ -14,24 +14,28 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AddressItemServiceImpl  implements AddressItemService {
+public class AddressItemServiceImpl implements AddressItemService {
 
     private final AddressItemRepository addressItemRepository;
 
     @Override
     public List<AddressItemDto> findAllAddressItems() {
-        return addressItemRepository.findAll().stream().map(AddressItemDto::toDto).toList();
+        return addressItemRepository.findAll()
+                .stream()
+                .map(AddressItemDto::toDto)
+                .toList();
     }
 
     @Override
     public AddressItemDto findAddressItemById(Long id) {
-        AddressItem addressItem = addressItemRepository.findById(id).orElseThrow(()-> new UsernameNotFoundException("Address item with id " + id + " not found"));
+        AddressItem addressItem = addressItemRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Address item with id " + id + " not found"));
         return AddressItemDto.toDto(addressItem);
     }
 
     @Override
     public AddressItemDto addAddressItem(AddressItemForm addressItemForm) {
-        AddressItem addressItem = this.toEntity(addressItemForm);
+        AddressItem addressItem = toEntity(addressItemForm);
         addressItemRepository.save(addressItem);
         return AddressItemDto.toDto(addressItem);
     }
@@ -42,43 +46,58 @@ public class AddressItemServiceImpl  implements AddressItemService {
                 .map(this::toEntity)
                 .toList();
         addressItemRepository.saveAll(addressItems);
-        return addressItems.stream().map(AddressItemDto::toDto).toList();
+        return addressItems.stream()
+                .map(AddressItemDto::toDto)
+                .toList();
     }
 
     @Override
     public List<AddressItemDto> findAddressItemByParentId(Long parentId) {
-        return addressItemRepository.findAddressItemByParentId(parentId).stream().map(AddressItemDto::toDto).toList();
+        return addressItemRepository.findAddressItemByParentId(parentId)
+                .stream()
+                .map(AddressItemDto::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<AddressItemDto> findAllAddressItemByAddressClass(AddressClass addressClass, Long parentId) {
+        if (parentId != null) {
+            return addressItemRepository.findAddressItemByAddressClassAndParentId(addressClass, parentId)
+                    .stream()
+                    .map(AddressItemDto::toDto)
+                    .toList();
+        } else {
+            return addressItemRepository.findAddressItemByAddressClass(addressClass)
+                    .stream()
+                    .map(AddressItemDto::toDto)
+                    .toList();
+        }
     }
 
     @Override
     public AddressItemDto updateAddressItem(AddressItemForm addressItem) {
+        // Update logic placeholder (currently returning null as per original code)
         return null;
     }
 
     @Override
     public void deleteAddressItem(Long id) {
-
+        // Delete logic placeholder (currently empty as per original code)
     }
 
     private AddressItem toEntity(AddressItemForm addressItemForm) {
+        return AddressItem.builder()
+                .name(addressItemForm.getName())
+                .addressClass(addressItemForm.getAddressClass())
+                .parent(getParentItem(addressItemForm.getParentId()))
+                .build();
+    }
 
-        if(addressItemForm.getParentId() != null) {
-            AddressItem parentItem = addressItemRepository
-                    .findById(addressItemForm.getParentId())
-                    .orElseThrow(() -> new UsernameNotFoundException("Address item with parent id " + addressItemForm.getParentId() + " not found"));
-
-            return AddressItem.builder()
-                    .name(addressItemForm.getName())
-                    .addressClass(addressItemForm.getAddressClass())
-                    .parent(parentItem)
-                    .build();
+    private AddressItem getParentItem(Long parentId) {
+        if (parentId == null) {
+            return null;
         }
-            return AddressItem.builder()
-                    .name(addressItemForm.getName())
-                    .addressClass(AddressClass.COUNTRY)
-                    .parent(null)
-                    .build();
-
-
+        return addressItemRepository.findById(parentId)
+                .orElseThrow(() -> new UsernameNotFoundException("Address item with parent id " + parentId + " not found"));
     }
 }

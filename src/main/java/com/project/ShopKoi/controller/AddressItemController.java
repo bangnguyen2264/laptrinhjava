@@ -1,6 +1,7 @@
 package com.project.ShopKoi.controller;
 
 import com.project.ShopKoi.model.dto.AddressItemDto;
+import com.project.ShopKoi.model.entity.AddressClass;
 import com.project.ShopKoi.model.form.AddressItemForm;
 import com.project.ShopKoi.service.AddressItemService;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,12 @@ public class AddressItemController {
     @GetMapping("/parent/{parentId}")
     public ResponseEntity<List<AddressItemDto>> getAddressItemsByParentId(@PathVariable Long parentId) {
         List<AddressItemDto> addressItems = addressItemService.findAddressItemByParentId(parentId);
+        return ResponseEntity.ok(addressItems);
+    }
+    @GetMapping("/class")
+    public ResponseEntity<List<AddressItemDto>> getAddressItemByAddressClass(@RequestParam AddressClass addressClass,
+                                                                             @RequestParam(required = false) Long parentId) {
+        List<AddressItemDto> addressItems = addressItemService.findAllAddressItemByAddressClass(addressClass, parentId);
         return ResponseEntity.ok(addressItems);
     }
 
