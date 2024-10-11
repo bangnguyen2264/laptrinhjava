@@ -2,6 +2,7 @@ package com.project.ShopKoi.service.impl;
 
 import com.project.ShopKoi.model.dto.AddressItemDto;
 import com.project.ShopKoi.model.entity.AddressItem;
+import com.project.ShopKoi.model.entity.AddressClass;
 import com.project.ShopKoi.model.form.AddressItemForm;
 import com.project.ShopKoi.repository.AddressItemRepository;
 import com.project.ShopKoi.service.AddressItemService;
@@ -29,21 +30,24 @@ public class AddressItemServiceImpl  implements AddressItemService {
     }
 
     @Override
+    public AddressItemDto addAddressItem(AddressItemForm addressItemForm) {
+        AddressItem addressItem = this.toEntity(addressItemForm);
+        addressItemRepository.save(addressItem);
+        return AddressItemDto.toDto(addressItem);
+    }
+
+    @Override
     public List<AddressItemDto> addAllAddressItem(List<AddressItemForm> addressItemForms) {
         List<AddressItem> addressItems = addressItemForms.stream()
                 .map(this::toEntity)
                 .toList();
+        addressItemRepository.saveAll(addressItems);
         return addressItems.stream().map(AddressItemDto::toDto).toList();
     }
 
     @Override
     public List<AddressItemDto> findAddressItemByParentId(Long parentId) {
-        return List.of();
-    }
-
-    @Override
-    public AddressItemDto firstAddressItemByChildrenId(Long childrenId) {
-        return null;
+        return addressItemRepository.findAddressItemByParentId(parentId).stream().map(AddressItemDto::toDto).toList();
     }
 
     @Override
@@ -57,14 +61,24 @@ public class AddressItemServiceImpl  implements AddressItemService {
     }
 
     private AddressItem toEntity(AddressItemForm addressItemForm) {
-        AddressItem parentItem = addressItemRepository
-                .findById(addressItemForm.getParentId())
-                .orElseThrow(()-> new UsernameNotFoundException("Address item with parent id " + addressItemForm.getParentId() + " not found"));
 
-        return AddressItem.builder()
-                .name(addressItemForm.getName())
-                .addressStatus(addressItemForm.getStatus())
-                .parent(parentItem)
-                .build();
+        if(addressItemForm.getParentId() != null) {
+            AddressItem parentItem = addressItemRepository
+                    .findById(addressItemForm.getParentId())
+                    .orElseThrow(() -> new UsernameNotFoundException("Address item with parent id " + addressItemForm.getParentId() + " not found"));
+
+            return AddressItem.builder()
+                    .name(addressItemForm.getName())
+                    .addressClass(addressItemForm.getAddressClass())
+                    .parent(parentItem)
+                    .build();
+        }
+            return AddressItem.builder()
+                    .name(addressItemForm.getName())
+                    .addressClass(AddressClass.COUNTRY)
+                    .parent(null)
+                    .build();
+
+
     }
 }

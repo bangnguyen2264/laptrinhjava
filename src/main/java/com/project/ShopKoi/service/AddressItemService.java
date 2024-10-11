@@ -10,9 +10,9 @@ public interface AddressItemService {
 
     List<AddressItemDto> findAllAddressItems();
     AddressItemDto findAddressItemById(Long id);
+    AddressItemDto addAddressItem(AddressItemForm addressItemForm);
     List<AddressItemDto> addAllAddressItem(List<AddressItemForm> addressItem);
     List<AddressItemDto> findAddressItemByParentId(Long parentId);
-    AddressItemDto firstAddressItemByChildrenId(Long childrenId);
     AddressItemDto updateAddressItem(AddressItemForm addressItem);
     void deleteAddressItem(Long id);
 

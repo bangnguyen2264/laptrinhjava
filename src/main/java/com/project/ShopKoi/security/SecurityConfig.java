@@ -38,7 +38,8 @@ public class SecurityConfig {
                                         "/configuration/security",
                                         "/swagger-ui/**",
                                         "/webjars/**",
-                                        "/swagger-ui.html")
+                                        "/swagger-ui.html",
+                                        "/api/v1/address-items/**")
                                 .permitAll()
                                 .requestMatchers("api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN")
                                 .anyRequest()
