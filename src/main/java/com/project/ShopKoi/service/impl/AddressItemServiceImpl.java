@@ -2,7 +2,7 @@ package com.project.ShopKoi.service.impl;
 
 import com.project.ShopKoi.model.dto.AddressItemDto;
 import com.project.ShopKoi.model.entity.AddressItem;
-import com.project.ShopKoi.model.entity.AddressClass;
+import com.project.ShopKoi.model.enums.AddressClass;
 import com.project.ShopKoi.model.form.AddressItemForm;
 import com.project.ShopKoi.repository.AddressItemRepository;
 import com.project.ShopKoi.service.AddressItemService;

@@ -1,8 +1,7 @@
 package com.project.ShopKoi.service;
 
 import com.project.ShopKoi.model.dto.AddressItemDto;
-import com.project.ShopKoi.model.entity.AddressClass;
-import com.project.ShopKoi.model.entity.AddressItem;
+import com.project.ShopKoi.model.enums.AddressClass;
 import com.project.ShopKoi.model.form.AddressItemForm;
 
 import java.util.List;

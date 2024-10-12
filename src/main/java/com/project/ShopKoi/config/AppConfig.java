@@ -2,7 +2,7 @@ package com.project.ShopKoi.config;
 
 
 import com.project.ShopKoi.model.entity.AddressItem;
-import com.project.ShopKoi.model.entity.AddressClass;
+import com.project.ShopKoi.model.enums.AddressClass;
 import com.project.ShopKoi.model.entity.Role;
 import com.project.ShopKoi.model.entity.User;
 import com.project.ShopKoi.repository.AddressItemRepository;

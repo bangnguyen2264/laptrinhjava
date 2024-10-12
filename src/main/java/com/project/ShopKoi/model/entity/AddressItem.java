@@ -1,5 +1,6 @@
 package com.project.ShopKoi.model.entity;
 
+import com.project.ShopKoi.model.enums.AddressClass;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
