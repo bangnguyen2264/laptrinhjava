@@ -1,8 +1,6 @@
 package com.project.ShopKoi.model.dto;
 
-import com.project.ShopKoi.model.entity.Address;
 import com.project.ShopKoi.model.entity.AddressItem;
-import com.project.ShopKoi.model.entity.AddressStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +15,7 @@ public class AddressItemDto {
         return AddressItemDto.builder()
                 .id(address.getId())
                 .name(address.getName())
-                .parentId(address.getParent().getId())
+                .parentId(address.getParent() != null ? address.getParent().getId() : null)
                 .build();
     }
 }
