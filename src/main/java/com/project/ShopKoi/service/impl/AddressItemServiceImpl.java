@@ -1,5 +1,6 @@
 package com.project.ShopKoi.service.impl;
 
+import com.project.ShopKoi.exception.NotFoundException;
 import com.project.ShopKoi.model.dto.AddressItemDto;
 import com.project.ShopKoi.model.entity.AddressItem;
 import com.project.ShopKoi.model.enums.AddressClass;
@@ -29,7 +30,7 @@ public class AddressItemServiceImpl implements AddressItemService {
     @Override
     public AddressItemDto findAddressItemById(Long id) {
         AddressItem addressItem = addressItemRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Address item with id " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("Address item with id " + id + " not found"));
         return AddressItemDto.toDto(addressItem);
     }
 
@@ -82,6 +83,8 @@ public class AddressItemServiceImpl implements AddressItemService {
 
     @Override
     public void deleteAddressItem(Long id) {
+        AddressItem addressItem = addressItemRepository.findById(id).orElseThrow(() -> new NotFoundException("Address item with id " + id + " not found"));
+        addressItemRepository.delete(addressItem);
         // Delete logic placeholder (currently empty as per original code)
     }
 
@@ -98,6 +101,6 @@ public class AddressItemServiceImpl implements AddressItemService {
             return null;
         }
         return addressItemRepository.findById(parentId)
-                .orElseThrow(() -> new UsernameNotFoundException("Address item with parent id " + parentId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Address item with parent id " + parentId + " not found"));
     }
 }

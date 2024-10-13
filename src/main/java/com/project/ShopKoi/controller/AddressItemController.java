@@ -4,6 +4,7 @@ import com.project.ShopKoi.model.dto.AddressItemDto;
 import com.project.ShopKoi.model.enums.AddressClass;
 import com.project.ShopKoi.model.form.AddressItemForm;
 import com.project.ShopKoi.service.AddressItemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class AddressItemController {
     }
 
     @PostMapping
-    public ResponseEntity<AddressItemDto> addAddressItem(@RequestBody AddressItemForm addressItemForm) {
+    public ResponseEntity<AddressItemDto> addAddressItem(@RequestBody @Valid AddressItemForm addressItemForm) {
         AddressItemDto newAddressItem = addressItemService.addAddressItem(addressItemForm);
         return ResponseEntity.ok(newAddressItem);
     }
@@ -53,14 +54,14 @@ public class AddressItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AddressItemDto> updateAddressItem(@PathVariable Long id, @RequestBody AddressItemForm addressItemForm) {
+    public ResponseEntity<AddressItemDto> updateAddressItem(@PathVariable Long id, @RequestBody @Valid AddressItemForm addressItemForm) {
         AddressItemDto updatedAddressItem = addressItemService.updateAddressItem(addressItemForm);
         return ResponseEntity.ok(updatedAddressItem);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAddressItem(@PathVariable Long id) {
+    public ResponseEntity<String> deleteAddressItem(@PathVariable Long id) {
         addressItemService.deleteAddressItem(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Deleted AddressItem successfully.") ;
     }
 }

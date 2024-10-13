@@ -24,6 +24,6 @@ public class AddressItem {
     private AddressClass addressClass;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", nullable = true)
+    @JoinColumn(name = "parentId", nullable = true)
     private AddressItem parent; // Tham chiếu tới AddressItem cha
 }

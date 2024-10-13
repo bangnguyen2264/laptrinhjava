@@ -1,12 +1,12 @@
 package com.project.ShopKoi.service.impl;
 
+import com.project.ShopKoi.exception.NotFoundException;
 import com.project.ShopKoi.model.dto.AddressDto;
 import com.project.ShopKoi.model.entity.Address;
 import com.project.ShopKoi.model.entity.AddressItem;
 import com.project.ShopKoi.model.form.AddressForm;
 import com.project.ShopKoi.repository.AddressItemRepository;
 import com.project.ShopKoi.repository.AddressRepository;
-import com.project.ShopKoi.repository.UserRepository;
 import com.project.ShopKoi.service.AddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,13 +24,13 @@ public class AddressServiceImpl implements AddressService {
     public AddressDto createAddress(AddressForm addressForm) {
         AddressItem country = addressItemRepository
                 .findByName(addressForm.getCountry())
-                .orElseThrow(()->new RuntimeException("Country "+addressForm.getCountry()+" not found"));
+                .orElseThrow(()->new NotFoundException("Country "+addressForm.getCountry()+" not found"));
         AddressItem city = addressItemRepository
                 .findByName(addressForm.getCity())
-                .orElseThrow(()->new RuntimeException("Country "+addressForm.getCity()+" not found"));
+                .orElseThrow(()->new NotFoundException("Country "+addressForm.getCity()+" not found"));
         AddressItem district = addressItemRepository
                 .findByName(addressForm.getDistrict())
-                .orElseThrow(()->new RuntimeException("Country "+addressForm.getCity()+" not found"));
+                .orElseThrow(()->new NotFoundException("Country "+addressForm.getCity()+" not found"));
         Address address = Address.builder()
                 .name(addressForm.getName())
                 .addressItems(new ArrayList<>())
@@ -45,7 +45,7 @@ public class AddressServiceImpl implements AddressService {
         return AddressDto
                 .toDto(addressRepository
                         .findById(id)
-                        .orElseThrow(()->new RuntimeException("Address not found")));
+                        .orElseThrow(()->new NotFoundException("Address not found")));
     }
 
     @Override

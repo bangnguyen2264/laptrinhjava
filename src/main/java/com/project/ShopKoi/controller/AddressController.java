@@ -3,6 +3,7 @@ package com.project.ShopKoi.controller;
 import com.project.ShopKoi.model.dto.AddressDto;
 import com.project.ShopKoi.model.form.AddressForm;
 import com.project.ShopKoi.service.AddressService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class AddressController {
     private final AddressService addressService;
 
     @PostMapping
-    public AddressDto createAddress(@RequestBody AddressForm address) {
+    public AddressDto createAddress(@RequestBody @Valid AddressForm address) {
         return addressService.createAddress(address);
     }
     @GetMapping("/{addressId}")
