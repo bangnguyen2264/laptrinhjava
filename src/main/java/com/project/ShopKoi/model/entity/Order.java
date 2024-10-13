@@ -24,13 +24,21 @@ public class Order extends BaseEntity {
     private String title;
     private int quantity;
     private double weight;
+
     @ManyToOne
+    @JoinColumn(name = "origin_address_id")
     private Address origin;
+
     @ManyToOne
+    @JoinColumn(name = "destination_address_id")
     private Address destination;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
     @Enumerated(EnumType.STRING)
     private TransportMethod method;
+
     private String note;
 }
+

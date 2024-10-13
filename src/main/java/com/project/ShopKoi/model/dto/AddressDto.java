@@ -4,11 +4,12 @@ import com.project.ShopKoi.model.entity.Address;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @Builder
-public class AddressDto {
+public class AddressDto implements Serializable {
     private Long id;
     private String name;
     private List<AddressItemDto> addressDtoList;

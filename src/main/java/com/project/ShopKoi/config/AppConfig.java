@@ -50,8 +50,8 @@ public class AppConfig {
                                 .role(adminRole)
                                 .build()
                 );
+                log.info("Admin initialized successfully");
             }
-            log.info("Admin initialized successfully");
             if(!addressItemRepository.existsByName("Việt Nam")) {
                 addressItemRepository.saveAll(List.of(
                         AddressItem.builder()
