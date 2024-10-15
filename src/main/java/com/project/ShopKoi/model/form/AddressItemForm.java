@@ -11,6 +11,8 @@ public class AddressItemForm {
     private String name;
     @NotBlank
     private AddressClass addressClass;
+    private double longitude;
+    private double latitude;
     private Long parentId;
 
 }

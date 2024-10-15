@@ -20,12 +20,17 @@ spring:
         format_sql: true
       database: postgresql
       database-platform: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      data-locations: classpath:data.sql
   cache:
     type: redis
   data:
     redis:
       host: localhost
       port: 6379
+      connect-timeout: 1000
+
 app:
   security:
     jwt:

@@ -21,16 +21,23 @@ public class Address extends BaseEntity implements Serializable {
 
     private String name;
 
+    private double longitude;
+    private double latitude;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "address_id")  // Tạo cột `address_id` trong bảng `address_item`
     private List<AddressItem> addressItems;
 
     @PrePersist
     @PreUpdate
-    public void validateAddressItems() {
+    // Hàm mới để thiết lập longitude và latitude từ AddressItem đầu tiên
+    public void setCoordinatesFromFirstItem() {
         if (addressItems == null || addressItems.size() != 3) {
             throw new IllegalStateException("Mỗi địa chỉ phải có đúng 3 AddressItem.");
         }
+        AddressItem firstItem = addressItems.getFirst();
+        this.longitude = firstItem.getLongitude();
+        this.latitude = firstItem.getLatitude();
     }
 
     @Override
@@ -45,6 +52,4 @@ public class Address extends BaseEntity implements Serializable {
         }
         return addressString.toString();
     }
-
-
 }

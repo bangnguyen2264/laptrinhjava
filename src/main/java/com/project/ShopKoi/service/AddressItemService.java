@@ -14,7 +14,7 @@ public interface AddressItemService {
     List<AddressItemDto> addAllAddressItem(List<AddressItemForm> addressItem);
     List<AddressItemDto> findAddressItemByParentId(Long parentId);
     List<AddressItemDto> findAllAddressItemByAddressClass(AddressClass addressClass, Long parentId);
-    AddressItemDto updateAddressItem(AddressItemForm addressItem);
+    AddressItemDto updateAddressItem(Long id,AddressItemForm addressItem);
     void deleteAddressItem(Long id);
 
 }

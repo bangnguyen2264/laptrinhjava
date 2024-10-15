@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,23 +25,9 @@ public class AddressServiceImpl implements AddressService {
     private final AddressItemRepository addressItemRepository;
 
     @Override
-    @Cacheable(value = "address")
+    @CachePut(value = "address", key = "#result.id")
     public AddressDto createAddress(AddressForm addressForm) {
-        AddressItem country = addressItemRepository
-                .findByName(addressForm.getCountry())
-                .orElseThrow(() -> new NotFoundException("Country " + addressForm.getCountry() + " not found"));
-        AddressItem city = addressItemRepository
-                .findByName(addressForm.getCity())
-                .orElseThrow(() -> new NotFoundException("City " + addressForm.getCity() + " not found"));
-        AddressItem district = addressItemRepository
-                .findByName(addressForm.getDistrict())
-                .orElseThrow(() -> new NotFoundException("District " + addressForm.getDistrict() + " not found"));
-
-        Address address = Address.builder()
-                .name(addressForm.getName())
-                .addressItems(new ArrayList<>())
-                .build();
-        address.getAddressItems().addAll(List.of(district, city,country));
+        Address address = buildAddressFromForm(addressForm);
         addressRepository.save(address);
         return AddressDto.toDto(address);
     }
@@ -48,22 +35,62 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Cacheable(value = "address", key = "#id")
     public AddressDto getAddressById(Long id) {
-        return AddressDto
-                .toDto(addressRepository
-                        .findById(id)
-                        .orElseThrow(() -> new NotFoundException("Address not found")));
+        return addressRepository.findById(id)
+                .map(AddressDto::toDto)
+                .orElseThrow(() -> new NotFoundException("Address not found"));
     }
 
     @Override
-    @Cacheable(value = "address")
-    public AddressDto updateAddress(AddressForm addressForm) {
-        // Logic cập nhật Address
-        return null;
+    @CachePut(value = "address", key = "#result.id")
+    public AddressDto updateAddress(Long id, AddressForm addressForm) {
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Address not found"));
+
+        updateAddressFromForm(address, addressForm);
+        addressRepository.save(address);
+        return AddressDto.toDto(address);
     }
 
     @Override
     @CacheEvict(value = "address", key = "#id")
+    @Transactional
     public void deleteAddressById(Long id) {
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Address not found"));
+
+        // Xóa các AddressItem liên quan trước
+        address.setAddressItems(new ArrayList<>());
+
+        addressRepository.save(address);
+
+        // Sau đó xóa Address
         addressRepository.deleteById(id);
+    }
+
+
+    private Address buildAddressFromForm(AddressForm addressForm) {
+        AddressItem country = getAddressItemByName(addressForm.getCountry(), "Country");
+        AddressItem city = getAddressItemByName(addressForm.getCity(), "City");
+        AddressItem district = getAddressItemByName(addressForm.getDistrict(), "District");
+
+        return Address.builder()
+                .name(addressForm.getName())
+                .addressItems(List.of(district, city, country))
+                .build();
+    }
+
+    private void updateAddressFromForm(Address address, AddressForm addressForm) {
+        AddressItem country = getAddressItemByName(addressForm.getCountry(), "Country");
+        AddressItem city = getAddressItemByName(addressForm.getCity(), "City");
+        AddressItem district = getAddressItemByName(addressForm.getDistrict(), "District");
+
+        address.setName(addressForm.getName());
+        address.getAddressItems().clear();
+        address.getAddressItems().addAll(List.of(district, city, country));
+    }
+
+    private AddressItem getAddressItemByName(String name, String itemType) {
+        return addressItemRepository.findByName(name)
+                .orElseThrow(() -> new NotFoundException(itemType + " " + name + " not found"));
     }
 }

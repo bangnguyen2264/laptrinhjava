@@ -7,7 +7,7 @@ import com.project.ShopKoi.model.form.AddressForm;
 public interface AddressService {
     AddressDto createAddress(AddressForm addressForm);
     AddressDto getAddressById(Long id);
-    AddressDto updateAddress(AddressForm addressForm);
+    AddressDto updateAddress(Long id,AddressForm addressForm);
     void deleteAddressById(Long id);
 
 }

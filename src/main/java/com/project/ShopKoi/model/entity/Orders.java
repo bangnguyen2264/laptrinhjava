@@ -24,6 +24,8 @@ public class Orders extends BaseEntity {
     private String title;
     private int quantity;
     private double weight;
+    @Column(nullable = false)
+    private double price;
 
     @ManyToOne
     @JoinColumn(name = "origin_address_id")

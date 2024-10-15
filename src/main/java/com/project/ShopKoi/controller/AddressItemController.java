@@ -55,7 +55,7 @@ public class AddressItemController {
 
     @PutMapping("/{id}")
     public ResponseEntity<AddressItemDto> updateAddressItem(@PathVariable Long id, @RequestBody @Valid AddressItemForm addressItemForm) {
-        AddressItemDto updatedAddressItem = addressItemService.updateAddressItem(addressItemForm);
+        AddressItemDto updatedAddressItem = addressItemService.updateAddressItem(id,addressItemForm);
         return ResponseEntity.ok(updatedAddressItem);
     }
 

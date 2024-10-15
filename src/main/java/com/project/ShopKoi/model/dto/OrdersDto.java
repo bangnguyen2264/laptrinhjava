@@ -4,11 +4,12 @@ import com.project.ShopKoi.model.entity.Orders;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @Builder
-public class OrdersDto {
+public class OrdersDto implements Serializable {
     private Long id;
     private UUID orderNumber;
     private String title;
@@ -18,6 +19,7 @@ public class OrdersDto {
     private String method;
     private String origin;
     private String destination;
+    private double price;
     private String note;
 
     public static OrdersDto toDto(Orders orders) {
@@ -31,6 +33,7 @@ public class OrdersDto {
                 .method(orders.getMethod().toString())
                 .origin(orders.getOrigin().toString())
                 .destination(orders.getDestination().toString())
+                .price(orders.getPrice())
                 .note(orders.getNote())
                 .build();
     }
