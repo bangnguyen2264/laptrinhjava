@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order extends BaseEntity {
+public class Orders extends BaseEntity {
     @Id
     @GeneratedValue
     private Long id;
@@ -40,5 +40,9 @@ public class Order extends BaseEntity {
     private TransportMethod method;
 
     private String note;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
 
