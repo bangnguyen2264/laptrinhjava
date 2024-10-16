@@ -4,9 +4,11 @@ import com.project.ShopKoi.model.entity.AddressItem;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @Builder
-public class AddressItemDto {
+public class AddressItemDto implements Serializable {
     private Long id;
     private String name;
     private Long parentId;

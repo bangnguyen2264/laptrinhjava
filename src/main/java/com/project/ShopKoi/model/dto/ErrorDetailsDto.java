@@ -3,9 +3,10 @@ package com.project.ShopKoi.model.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 @Data
-public class ErrorDetailsDto {
+public class ErrorDetailsDto implements Serializable {
     @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
     private Date timestamp;
     private int status;

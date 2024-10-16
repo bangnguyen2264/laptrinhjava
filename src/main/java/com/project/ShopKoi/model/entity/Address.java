@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Address {
+public class Address extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,4 +32,19 @@ public class Address {
             throw new IllegalStateException("Mỗi địa chỉ phải có đúng 3 AddressItem.");
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder addressString = new StringBuilder(name + ": ");
+        for (AddressItem item : addressItems) {
+            addressString.append(item.getName()).append(", ");  // `getDetail()` là giả định phương thức lấy chi tiết từ AddressItem
+        }
+        // Xóa dấu phẩy và khoảng trắng cuối cùng
+        if (!addressString.isEmpty()) {
+            addressString.setLength(addressString.length() - 2);
+        }
+        return addressString.toString();
+    }
+
+
 }

@@ -25,5 +25,9 @@ public class AddressController {
         return addressService.getAddressById(addressId);
     }
 
+    @DeleteMapping("/{addressId}")
+    public void deleteAddress(@PathVariable Long addressId) {
+        addressService.deleteAddressById(addressId);
+    }
 
 }

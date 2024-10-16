@@ -34,6 +34,8 @@ public class User implements UserDetails {
     private String password;
     @ManyToOne(fetch = FetchType.EAGER)
     private Role role;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Orders> orders;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
