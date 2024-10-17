@@ -17,15 +17,18 @@ import com.project.ShopKoi.service.OrderService;
 import com.project.ShopKoi.utils.ShipFee;
 import com.project.ShopKoi.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -36,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     @CachePut(value = "orders", key = "#result.orderNumber") // Cache the created order
     public OrdersDto createOrder(OrdersForm orderForm) {
         User user = userRepository.findByEmail(UserUtils.getMe())
@@ -43,11 +47,26 @@ public class OrderServiceImpl implements OrderService {
 
         // Check and get or create addresses
         Address origin = createOrGetAddress(orderForm.getOrigin());
+        log.info("Origin address: {}", origin);
         Address destination = createOrGetAddress(orderForm.getDestination());
-
+        log.info("Destination address: {}", destination);
         // Build the order
-        Orders orders = buildOrder(orderForm, user, origin, destination);
+        Orders orders = Orders.builder()
+                .orderNumber(UUID.randomUUID())
+                .title("Đơn hàng của " + UserUtils.getMe())
+                .origin(origin)
+                .destination(destination)
+                .quantity(orderForm.getQuantity())
+                .weight(orderForm.getWeight())
+                .status(OrderStatus.PENDING)
+                .method(orderForm.getMethod())
+                .user(user)
+                .note(orderForm.getNote())
+                .build();
+        orders.setPrice(ShipFee.calculate(orders));
         orderRepository.save(orders);
+        user.getOrders().add(orders);
+        userRepository.save(user); // Update user's orders
         return OrdersDto.toDto(orders);
     }
 
@@ -102,6 +121,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Get address items
         List<AddressItem> addressItems = convertAddressItems(addressForm);
+        log.info("Address items: {}", addressItems);
 
         // Check if the address already exists
         Optional<Address> existingAddress = addressRepository.findByNameAndAddressItems(addressName, addressItems);
@@ -116,24 +136,7 @@ public class OrderServiceImpl implements OrderService {
         });
     }
 
-    private Orders buildOrder(OrdersForm orderForm, User user, Address origin, Address destination) {
-        Orders orders = Orders.builder()
-                .orderNumber(UUID.randomUUID())
-                .title("Đơn hàng của " + UserUtils.getMe())
-                .origin(origin)
-                .destination(destination)
-                .quantity(orderForm.getQuantity())
-                .weight(orderForm.getWeight())
-                .status(OrderStatus.PENDING)
-                .method(orderForm.getMethod())
-                .user(user)
-                .note(orderForm.getNote())
-                .build();
-        orders.setPrice(ShipFee.calculate(orders));
-        user.getOrders().add(orders);
-        userRepository.save(user); // Update user's orders
-        return orders;
-    }
+
 
     private List<AddressItem> convertAddressItems(AddressForm addressForm) {
         AddressItem country = addressItemRepository

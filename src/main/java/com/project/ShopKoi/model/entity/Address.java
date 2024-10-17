@@ -42,7 +42,7 @@ public class Address extends BaseEntity implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder addressString = new StringBuilder(name + ": ");
+        StringBuilder addressString = new StringBuilder(name + " ");
         for (AddressItem item : addressItems) {
             addressString.append(item.getName()).append(", ");  // `getDetail()` là giả định phương thức lấy chi tiết từ AddressItem
         }
