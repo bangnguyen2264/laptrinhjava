@@ -6,6 +6,7 @@ import com.project.ShopKoi.model.entity.User;
 import com.project.ShopKoi.model.form.UpdatePasswordForm;
 import com.project.ShopKoi.repository.UserRepository;
 import com.project.ShopKoi.service.UserService;
+import com.project.ShopKoi.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,16 +23,14 @@ public class UserServiceImpl implements UserService {
     private  PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDto getInfomationUser(Principal connectedUser) {
-        User user = userRepository.findByEmail(connectedUser.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDto getInfomationUser() {
+        User user = userRepository.findByEmail(UserUtils.getMe()).orElseThrow();
         return UserDto.toDto(user);
     }
 
     @Override
-    public UserDto updateInformationUser(Principal connectedUser, UpdateInformationUserForm form) {
-        User user = userRepository.findByEmail(connectedUser.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDto updateInformationUser(UpdateInformationUserForm form) {
+        User user = userRepository.findByEmail(UserUtils.getMe()).orElseThrow();
         if (form.getFullName() != null) {
             user.setFullName(form.getFullName());
         }
@@ -46,9 +45,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updatePassword(UpdatePasswordForm request, Principal connectedUser) {
-        User user = userRepository.findByEmail(connectedUser.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public String updatePassword(UpdatePasswordForm request ) {
+        User user = userRepository.findByEmail(UserUtils.getMe()).orElseThrow();
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             return "Current password is incorrect";
