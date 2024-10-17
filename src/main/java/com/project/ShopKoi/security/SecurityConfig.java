@@ -33,6 +33,7 @@ public class    SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
