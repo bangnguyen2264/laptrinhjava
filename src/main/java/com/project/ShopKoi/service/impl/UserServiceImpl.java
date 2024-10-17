@@ -8,6 +8,7 @@ import com.project.ShopKoi.repository.UserRepository;
 import com.project.ShopKoi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -17,6 +18,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private  PasswordEncoder passwordEncoder;
 
     @Override
     public UserDto getInfomationUser(Principal connectedUser) {
@@ -43,17 +46,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updatePassword(UpdatePasswordForm form, Principal connectedUser) {
+    public String updatePassword(UpdatePasswordForm request, Principal connectedUser) {
         User user = userRepository.findByEmail(connectedUser.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if (!form.getOldPassword().equals(user.getPassword())) {
-            throw new IllegalArgumentException("Mật khẩu cũ không đúng");
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return "Current password is incorrect";
         }
-        if (!form.getNewPassword().equals(form.getConfirmPassword())) {
-            throw new IllegalArgumentException("Mật khẩu mới và xác nhận mật khẩu không khớp");
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return "New password and confirm password do not match";
         }
-        user.setPassword(form.getNewPassword());
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        return "Mật khẩu đã được thay đổi thành công";
+        return "Password changed successfully";
     }
+
 }
