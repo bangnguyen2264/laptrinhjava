@@ -5,6 +5,7 @@ import com.project.ShopKoi.model.form.UpdateInformationUserForm;
 import com.project.ShopKoi.model.form.UpdatePasswordForm;
 import com.project.ShopKoi.service.AuthService;
 import com.project.ShopKoi.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,21 +20,21 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/info")
-    public ResponseEntity<UserDto> getCurrentUser(Principal principal) {
-        UserDto user = userService.getInfomationUser(principal);
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getCurrentUser() {
+        UserDto user = userService.getInfomationUser();
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/update-info")
-    public ResponseEntity<UserDto> updateUserInfo(Principal principal, @RequestBody UpdateInformationUserForm updateInformationUserForm) {
-        UserDto updatedUser = userService.updateInformationUser(principal, updateInformationUserForm);
+    @PostMapping("/update-me")
+    public ResponseEntity<UserDto> updateUserInfo(@RequestBody UpdateInformationUserForm updateInformationUserForm) {
+        UserDto updatedUser = userService.updateInformationUser(updateInformationUserForm);
         return ResponseEntity.ok(updatedUser);
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<String> updateUserPassword(Principal principal, @RequestBody UpdatePasswordForm updatePasswordForm) {
-        String responseMessage = userService.updatePassword(updatePasswordForm, principal);
+    public ResponseEntity<String> updateUserPassword(@Valid @RequestBody UpdatePasswordForm updatePasswordForm) {
+        String responseMessage = userService.updatePassword(updatePasswordForm);
         return ResponseEntity.ok(responseMessage);
     }
 }
