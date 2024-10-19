@@ -1,5 +1,6 @@
-package com.project.ShopKoi.security;
+package com.project.ShopKoi.config;
 
+import com.project.ShopKoi.security.JwtAuthenticationFilter;
 import com.project.ShopKoi.service.impl.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
