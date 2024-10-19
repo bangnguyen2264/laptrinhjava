@@ -11,6 +11,7 @@ import com.project.ShopKoi.model.entity.User;
 import com.project.ShopKoi.model.enums.OrderStatus;
 import com.project.ShopKoi.model.enums.TransportMethod;
 import com.project.ShopKoi.model.form.AddressForm;
+import com.project.ShopKoi.model.form.FeedbackForm;
 import com.project.ShopKoi.model.form.OrdersForm;
 import com.project.ShopKoi.repository.AddressItemRepository;
 import com.project.ShopKoi.repository.AddressRepository;
@@ -123,10 +124,14 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
+    public OrdersDto changeStatusOrder(Long id, OrderStatus status, FeedbackForm feedbackForm) {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
             order.setStatus(OrderStatus.valueOf(status.toString()));
+            if (status == OrderStatus.COMPLETED ) {
+                order.setRating(feedbackForm.getRating());
+                order.setFeedbackMessage(feedbackForm.getFeedbackMessage());
+            }
             orderRepository.save(order);
             return OrdersDto.toDto(order);
     }
