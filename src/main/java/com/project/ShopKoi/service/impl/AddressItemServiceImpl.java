@@ -8,10 +8,10 @@ import com.project.ShopKoi.model.form.AddressItemForm;
 import com.project.ShopKoi.repository.AddressItemRepository;
 import com.project.ShopKoi.service.AddressItemService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -24,8 +24,7 @@ public class AddressItemServiceImpl implements AddressItemService {
     @Override
     @Cacheable(value = "address_item")
     public List<AddressItemDto> findAllAddressItems() {
-        return addressItemRepository.findAll()
-                .stream()
+        return addressItemRepository.findAll().stream()
                 .map(AddressItemDto::toDto)
                 .toList();
     }
@@ -33,9 +32,9 @@ public class AddressItemServiceImpl implements AddressItemService {
     @Override
     @Cacheable(value = "address_item", key = "#id")
     public AddressItemDto findAddressItemById(Long id) {
-        AddressItem addressItem = addressItemRepository.findById(id)
+        return addressItemRepository.findById(id)
+                .map(AddressItemDto::toDto)
                 .orElseThrow(() -> new NotFoundException("Address item with id " + id + " not found"));
-        return AddressItemDto.toDto(addressItem);
     }
 
     @Override
@@ -69,29 +68,23 @@ public class AddressItemServiceImpl implements AddressItemService {
 
     @Override
     public List<AddressItemDto> findAllAddressItemByAddressClass(AddressClass addressClass, Long parentId) {
-        if (parentId != null) {
-            return addressItemRepository.findAddressItemByAddressClassAndParentId(addressClass, parentId)
-                    .stream()
-                    .map(AddressItemDto::toDto)
-                    .toList();
-        } else {
-            return addressItemRepository.findAddressItemByAddressClass(addressClass)
-                    .stream()
-                    .map(AddressItemDto::toDto)
-                    .toList();
-        }
+        return (parentId != null)
+                ? addressItemRepository.findAddressItemByAddressClassAndParentId(addressClass, parentId)
+                .stream()
+                .map(AddressItemDto::toDto)
+                .toList()
+                : addressItemRepository.findAddressItemByAddressClass(addressClass)
+                .stream()
+                .map(AddressItemDto::toDto)
+                .toList();
     }
 
     @Override
     @CachePut(value = "address_item", key = "#result.id")
-    public AddressItemDto updateAddressItem(Long id ,AddressItemForm addressItemForm) {
+    public AddressItemDto updateAddressItem(Long id, AddressItemForm addressItemForm) {
         AddressItem addressItem = addressItemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Address item with id " + id+ " not found"));
-        addressItem.setName(addressItemForm.getName());
-        addressItem.setAddressClass(addressItemForm.getAddressClass());
-        addressItem.setLongitude(addressItemForm.getLongitude());
-        addressItem.setLatitude(addressItemForm.getLatitude());
-        addressItem.setParent(getParentItem(addressItemForm.getParentId()));
+                .orElseThrow(() -> new NotFoundException("Address item with id " + id + " not found"));
+        updateAddressItemFromForm(addressItem, addressItemForm);
         addressItemRepository.save(addressItem);
         return AddressItemDto.toDto(addressItem);
     }
@@ -114,11 +107,18 @@ public class AddressItemServiceImpl implements AddressItemService {
                 .build();
     }
 
+    private void updateAddressItemFromForm(AddressItem addressItem, AddressItemForm addressItemForm) {
+        addressItem.setName(addressItemForm.getName());
+        addressItem.setAddressClass(addressItemForm.getAddressClass());
+        addressItem.setLongitude(addressItemForm.getLongitude());
+        addressItem.setLatitude(addressItemForm.getLatitude());
+        addressItem.setParent(getParentItem(addressItemForm.getParentId()));
+    }
+
     private AddressItem getParentItem(Long parentId) {
-        if (parentId == null) {
-            return null;
-        }
-        return addressItemRepository.findById(parentId)
-                .orElseThrow(() -> new NotFoundException("Address item with parent id " + parentId + " not found"));
+        return parentId == null ? null :
+                addressItemRepository.findById(parentId)
+                        .orElseThrow(() -> new NotFoundException("Address item with parent id " + parentId + " not found"));
     }
 }
+

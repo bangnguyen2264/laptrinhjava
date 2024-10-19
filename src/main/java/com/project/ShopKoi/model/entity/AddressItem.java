@@ -1,8 +1,6 @@
     package com.project.ShopKoi.model.entity;
 
     import com.fasterxml.jackson.annotation.JsonBackReference;
-    import com.fasterxml.jackson.annotation.JsonIgnore;
-    import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
     import com.project.ShopKoi.model.enums.AddressClass;
     import jakarta.persistence.*;
 
@@ -12,6 +10,7 @@
     import lombok.NoArgsConstructor;
 
     import java.io.Serializable;
+    import java.util.List;
 
     @Entity
     @Data
@@ -24,6 +23,7 @@
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
+
         @Column(unique = true, nullable = false)
         private String name;
 
@@ -33,8 +33,12 @@
         private double longitude;
         private double latitude;
 
+        @ManyToMany(mappedBy = "addressItems")
+        private List<Address> addresses; // Danh sách địa chỉ liên kết với AddressItem
+
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "parentId", nullable = true)
         @JsonBackReference
         private AddressItem parent; // Tham chiếu tới AddressItem cha
     }
+

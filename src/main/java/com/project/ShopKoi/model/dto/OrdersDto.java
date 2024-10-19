@@ -1,14 +1,18 @@
 package com.project.ShopKoi.model.dto;
 
 import com.project.ShopKoi.model.entity.Orders;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrdersDto implements Serializable {
     private Long id;
     private UUID orderNumber;

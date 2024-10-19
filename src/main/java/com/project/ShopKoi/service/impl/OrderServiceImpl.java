@@ -1,5 +1,6 @@
 package com.project.ShopKoi.service.impl;
 
+import com.project.ShopKoi.exception.BadRequestException;
 import com.project.ShopKoi.exception.NotFoundException;
 import com.project.ShopKoi.model.dto.OrdersDto;
 import com.project.ShopKoi.model.entity.Address;
@@ -18,12 +19,10 @@ import com.project.ShopKoi.utils.ShipFee;
 import com.project.ShopKoi.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,7 +39,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    @CachePut(value = "orders", key = "#result.orderNumber") // Cache the created order
     public OrdersDto createOrder(OrdersForm orderForm) {
         User user = userRepository.findByEmail(UserUtils.getMe())
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -71,7 +69,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Cacheable(value = "orders", key = "#id") // Cache the order by ID
     public OrdersDto getOrderById(Long id) {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -79,7 +76,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Cacheable(value = "orders") // Cache all orders
     public List<OrdersDto> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(OrdersDto::toDto)
@@ -87,30 +83,49 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Cacheable(value = "orders", key = "'myOrders_' + T(com.project.ShopKoi.utils.UserUtils).getMe()") // Cache user's orders
     public List<OrdersDto> getMyOrder() {
-        User user = userRepository.findByEmail(UserUtils.getMe())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        User user = this.getCurrentUser();
         return user.getOrders().stream()
                 .map(OrdersDto::toDto)
                 .toList();
     }
 
     @Override
-    @CacheEvict(value = "orders", key = "#id") // Evict the order from cache on delete
-    public OrdersDto deleteOrder(Long id) {
+    public String deleteOrder(Long id) {
+        // Tìm đơn hàng theo id
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        // Lấy người dùng hiện tại
+        User currentUser = this.getCurrentUser();
+
+        // Kiểm tra nếu người dùng hiện tại là chủ đơn hàng hoặc có quyền admin
+        if (!order.getUser().equals(currentUser) && !currentUser.getRole().getName().equals("ROLE_ADMIN")) {
+            throw new IllegalStateException("You don't have permission to delete this order");
+        }
+
+        // Kiểm tra trạng thái đơn hàng
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new BadRequestException("Only orders with PENDING status can be deleted");
+        }
+
+        // Xóa tham chiếu đến địa chỉ nếu muốn (không bắt buộc)
+        order.setOrigin(null);
+        order.setDestination(null);
+
+        // Xóa đơn hàng nhưng giữ lại địa chỉ
         orderRepository.delete(order);
-        return OrdersDto.toDto(order);
+
+        return "Deleted Order Successfully";
     }
 
+
+
     @Override
-    @CacheEvict(value = "orders", key = "#id") // Evict the order from cache on status change
-    public OrdersDto changeStatusOrder(Long id, String status) {
+    public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
-        order.setStatus(OrderStatus.valueOf(status));
+        order.setStatus(OrderStatus.valueOf(status.toString()));
         orderRepository.save(order);
         return OrdersDto.toDto(order);
     }
@@ -121,20 +136,31 @@ public class OrderServiceImpl implements OrderService {
 
         // Get address items
         List<AddressItem> addressItems = convertAddressItems(addressForm);
+        if (addressItems.size() != 3) {
+            throw new BadRequestException("Address items size mismatch");
+        }
         log.info("Address items: {}", addressItems);
 
         // Check if the address already exists
         Optional<Address> existingAddress = addressRepository.findByNameAndAddressItems(addressName, addressItems);
 
-        // If the address exists, return it; otherwise, create a new one
-        return existingAddress.orElseGet(() -> {
-            Address newAddress = Address.builder()
-                    .name(addressName)
-                    .addressItems(addressItems)
-                    .build();
-            return addressRepository.save(newAddress); // Save the new address
-        });
+        // If the address exists and has at least 3 items, return it; otherwise, create a new one
+        if (existingAddress.isPresent()) {
+            Address address = existingAddress.get();
+            // Check if the existing address has at least 3 items
+            if (address.getAddressItems().size() >= 3) {
+                return address; // Return the existing address if it has enough items
+            }
+        }
+
+        // Create a new address since the existing one is not suitable
+        Address newAddress = Address.builder()
+                .name(addressName)
+                .addressItems(addressItems)
+                .build();
+        return addressRepository.save(newAddress); // Save the new address
     }
+
 
 
 
@@ -149,5 +175,8 @@ public class OrderServiceImpl implements OrderService {
                 .findByName(addressForm.getDistrict())
                 .orElseThrow(() -> new NotFoundException("District " + addressForm.getDistrict() + " not found"));
         return List.of(district, city, country);
+    }
+    private User getCurrentUser() {
+        return userRepository.findByEmail(UserUtils.getMe()).orElseThrow(() -> new IllegalArgumentException("User not sign in"));
     }
 }

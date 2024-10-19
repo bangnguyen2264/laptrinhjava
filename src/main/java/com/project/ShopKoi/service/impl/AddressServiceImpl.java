@@ -21,6 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
+
     private final AddressRepository addressRepository;
     private final AddressItemRepository addressItemRepository;
 
@@ -46,6 +47,7 @@ public class AddressServiceImpl implements AddressService {
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Address not found"));
 
+        // Cập nhật chỉ các thông tin khác, không thay đổi AddressItems
         updateAddressFromForm(address, addressForm);
         addressRepository.save(address);
         return AddressDto.toDto(address);
@@ -58,13 +60,17 @@ public class AddressServiceImpl implements AddressService {
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Address not found"));
 
-        // Xóa các AddressItem liên quan trước
-        address.setAddressItems(new ArrayList<>());
+        // Bỏ liên kết giữa Address và AddressItem
+        for (AddressItem item : address.getAddressItems()) {
+            item.setAddresses(null); // Thiết lập địa chỉ của item thành null
+            addressItemRepository.save(item);
+        }
+        address.setAddressItems(null);
 
-        addressRepository.save(address);
+        addressRepository.save(address); // Lưu lại các thay đổi
 
         // Sau đó xóa Address
-        addressRepository.deleteById(id);
+        addressRepository.delete(address);
     }
 
 
@@ -75,18 +81,13 @@ public class AddressServiceImpl implements AddressService {
 
         return Address.builder()
                 .name(addressForm.getName())
-                .addressItems(List.of(district, city, country))
+                .addressItems(List.of(district, city, country)) // Gán danh sách AddressItem mới
                 .build();
     }
 
     private void updateAddressFromForm(Address address, AddressForm addressForm) {
-        AddressItem country = getAddressItemByName(addressForm.getCountry(), "Country");
-        AddressItem city = getAddressItemByName(addressForm.getCity(), "City");
-        AddressItem district = getAddressItemByName(addressForm.getDistrict(), "District");
-
-        address.setName(addressForm.getName());
-        address.getAddressItems().clear();
-        address.getAddressItems().addAll(List.of(district, city, country));
+        address.setName(addressForm.getName()); // Cập nhật tên địa chỉ
+        // Không thay đổi danh sách AddressItems, chỉ cập nhật tên
     }
 
     private AddressItem getAddressItemByName(String name, String itemType) {
@@ -94,3 +95,4 @@ public class AddressServiceImpl implements AddressService {
                 .orElseThrow(() -> new NotFoundException(itemType + " " + name + " not found"));
     }
 }
+

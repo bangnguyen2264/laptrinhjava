@@ -10,8 +10,6 @@ import java.util.Optional;
 public interface AddressItemRepository extends JpaRepository<AddressItem, Long> {
     List<AddressItem> findAddressItemByParentId(Long parentId);
     List<AddressItem> findAddressItemByAddressClass(AddressClass addressClass);
-    boolean existsByParentId(Long parentId);
-
     boolean existsByName(String name);
 
     List<AddressItem> findAddressItemByAddressClassAndParentId(AddressClass addressClass, Long parentId);

@@ -9,5 +9,5 @@ import java.security.Principal;
 public interface UserService {
     UserDto getInfomationUser(Principal principal);
     UserDto updateInformationUser (Principal connectedUser, UpdateInformationUserForm form);
-    String updatePassword(UpdatePasswordForm form, Principal connectedUser);
+    String updatePassword(UpdatePasswordForm form);
 }

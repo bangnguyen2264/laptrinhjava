@@ -24,18 +24,21 @@ public class Address extends BaseEntity implements Serializable {
     private double longitude;
     private double latitude;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "address_id")  // Tạo cột `address_id` trong bảng `address_item`
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "address_address_item", // Tên bảng liên kết
+            joinColumns = @JoinColumn(name = "address_id"), // Cột trong bảng liên kết
+            inverseJoinColumns = @JoinColumn(name = "address_item_id") // Cột trong bảng liên kết
+    )
     private List<AddressItem> addressItems;
 
     @PrePersist
     @PreUpdate
-    // Hàm mới để thiết lập longitude và latitude từ AddressItem đầu tiên
     public void setCoordinatesFromFirstItem() {
         if (addressItems == null || addressItems.size() != 3) {
             throw new IllegalStateException("Mỗi địa chỉ phải có đúng 3 AddressItem.");
         }
-        AddressItem firstItem = addressItems.getFirst();
+        AddressItem firstItem = addressItems.get(0);
         this.longitude = firstItem.getLongitude();
         this.latitude = firstItem.getLatitude();
     }
@@ -44,12 +47,12 @@ public class Address extends BaseEntity implements Serializable {
     public String toString() {
         StringBuilder addressString = new StringBuilder(name + " ");
         for (AddressItem item : addressItems) {
-            addressString.append(item.getName()).append(", ");  // `getDetail()` là giả định phương thức lấy chi tiết từ AddressItem
+            addressString.append(item.getName()).append(", ");
         }
-        // Xóa dấu phẩy và khoảng trắng cuối cùng
         if (!addressString.isEmpty()) {
             addressString.setLength(addressString.length() - 2);
         }
         return addressString.toString();
     }
 }
+

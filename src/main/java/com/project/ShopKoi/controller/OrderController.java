@@ -1,5 +1,6 @@
 package com.project.ShopKoi.controller;
 
+import com.project.ShopKoi.model.enums.OrderStatus;
 import com.project.ShopKoi.model.form.OrdersForm;
 import com.project.ShopKoi.service.OrderService;
 import jakarta.validation.Valid;
@@ -32,6 +33,11 @@ public class OrderController {
     @GetMapping("{orderId}")
     public ResponseEntity getOrderById(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrderById(orderId));
+    }
+
+    @PatchMapping("/change-status/{orderId}")
+    public ResponseEntity changeStatusOrder(@PathVariable Long orderId, @RequestParam OrderStatus status) {
+        return ResponseEntity.ok(orderService.changeStatusOrder(orderId, status));
     }
 
     @DeleteMapping("/{orderId}")
