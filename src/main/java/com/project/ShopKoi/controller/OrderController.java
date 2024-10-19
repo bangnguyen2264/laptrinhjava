@@ -44,4 +44,9 @@ public class OrderController {
     public ResponseEntity deleteOrder(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.deleteOrder(orderId));
     }
+
+    @PostMapping("/price-table")
+    public ResponseEntity getTablePrice(@RequestBody OrdersForm ordersForm) {
+        return ResponseEntity.ok(orderService.showPriceTable(ordersForm));
+    }
 }

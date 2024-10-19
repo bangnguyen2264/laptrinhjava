@@ -28,13 +28,24 @@ public class    SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Các endpoint công khai
                         .requestMatchers(getPublicEndpoints()).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/address-items/**").permitAll()
+                        // Chỉ có Admin có thể truy cập đến các chức năng của Address Items
+                        .requestMatchers(HttpMethod.GET, "/api/v1/address-items/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
+                        // Cấu hình cho API đơn hàng
+                        .requestMatchers(HttpMethod.POST, "/api/v1/order").authenticated() // Người dùng đã đăng nhập có thể tạo đơn hàng
+                        .requestMatchers(HttpMethod.GET, "/api/v1/order/me").authenticated() // Người dùng đã đăng nhập có thể xem đơn hàng của mình
+                        .requestMatchers(HttpMethod.GET, "/api/v1/order").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xem tất cả đơn hàng
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/order/change-status/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể thay đổi trạng thái đơn hàng
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xóa đơn hàng
+                        // Cấu hình quyền cho người dùng
                         .requestMatchers("/api/v1/user/**").authenticated()
-                        .requestMatchers("api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN")
+                        // Cấu hình quyền cho admin
+                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN")
+                        // Các yêu cầu còn lại yêu cầu xác thực
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
@@ -43,6 +54,7 @@ public class    SecurityConfig {
 
         return http.build();
     }
+
 
     private String[] getPublicEndpoints() {
         return new String[]{

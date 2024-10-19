@@ -20,14 +20,14 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/info")
-    public ResponseEntity<UserDto> getCurrentUser(Principal principal) {
-        UserDto user = userService.getInfomationUser(principal);
+    public ResponseEntity<UserDto> getCurrentUser() {
+        UserDto user = userService.getInfomationUser();
         return ResponseEntity.ok(user);
     }
 
     @PostMapping("/update-info")
-    public ResponseEntity<UserDto> updateUserInfo(Principal principal, @RequestBody UpdateInformationUserForm updateInformationUserForm) {
-        UserDto updatedUser = userService.updateInformationUser(principal, updateInformationUserForm);
+    public ResponseEntity<UserDto> updateUserInfo(@RequestBody UpdateInformationUserForm updateInformationUserForm) {
+        UserDto updatedUser = userService.updateInformationUser(updateInformationUserForm);
         return ResponseEntity.ok(updatedUser);
     }
 

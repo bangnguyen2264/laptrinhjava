@@ -1,6 +1,7 @@
 package com.project.ShopKoi.service;
 
 import com.project.ShopKoi.model.dto.OrdersDto;
+import com.project.ShopKoi.model.dto.PriceTableDto;
 import com.project.ShopKoi.model.enums.OrderStatus;
 import com.project.ShopKoi.model.form.OrdersForm;
 
@@ -13,5 +14,6 @@ public interface OrderService {
     List<OrdersDto> getMyOrder();
     String deleteOrder(Long id);
     OrdersDto changeStatusOrder(Long id, OrderStatus status);
+    List<PriceTableDto> showPriceTable(OrdersForm ordersForm);
 
 }

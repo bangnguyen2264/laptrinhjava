@@ -7,7 +7,7 @@ import com.project.ShopKoi.model.form.UpdatePasswordForm;
 import java.security.Principal;
 
 public interface UserService {
-    UserDto getInfomationUser(Principal principal);
-    UserDto updateInformationUser (Principal connectedUser, UpdateInformationUserForm form);
+    UserDto getInfomationUser();
+    UserDto updateInformationUser ( UpdateInformationUserForm form);
     String updatePassword(UpdatePasswordForm form);
 }

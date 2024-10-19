@@ -3,11 +3,13 @@ package com.project.ShopKoi.service.impl;
 import com.project.ShopKoi.exception.BadRequestException;
 import com.project.ShopKoi.exception.NotFoundException;
 import com.project.ShopKoi.model.dto.OrdersDto;
+import com.project.ShopKoi.model.dto.PriceTableDto;
 import com.project.ShopKoi.model.entity.Address;
 import com.project.ShopKoi.model.entity.AddressItem;
 import com.project.ShopKoi.model.entity.Orders;
 import com.project.ShopKoi.model.entity.User;
 import com.project.ShopKoi.model.enums.OrderStatus;
+import com.project.ShopKoi.model.enums.TransportMethod;
 import com.project.ShopKoi.model.form.AddressForm;
 import com.project.ShopKoi.model.form.OrdersForm;
 import com.project.ShopKoi.repository.AddressItemRepository;
@@ -49,23 +51,27 @@ public class OrderServiceImpl implements OrderService {
         Address destination = createOrGetAddress(orderForm.getDestination());
         log.info("Destination address: {}", destination);
         // Build the order
-        Orders orders = Orders.builder()
-                .orderNumber(UUID.randomUUID())
-                .title("Đơn hàng của " + UserUtils.getMe())
-                .origin(origin)
-                .destination(destination)
-                .quantity(orderForm.getQuantity())
-                .weight(orderForm.getWeight())
-                .status(OrderStatus.PENDING)
-                .method(orderForm.getMethod())
-                .user(user)
-                .note(orderForm.getNote())
-                .build();
+        Orders orders = buildOrders(orderForm,origin,destination,user);
         orders.setPrice(ShipFee.calculate(orders));
         orderRepository.save(orders);
         user.getOrders().add(orders);
         userRepository.save(user); // Update user's orders
         return OrdersDto.toDto(orders);
+    }
+
+    private Orders buildOrders(OrdersForm ordersForm, Address origin, Address destination, User user) {
+        return Orders.builder()
+                .orderNumber(UUID.randomUUID())
+                .title("Đơn hàng của " + UserUtils.getMe())
+                .origin(origin)
+                .destination(destination)
+                .quantity(ordersForm.getQuantity())
+                .weight(ordersForm.getWeight())
+                .status(OrderStatus.PENDING)
+                .method(ordersForm.getMethod())
+                .user(user)
+                .note(ordersForm.getNote())
+                .build();
     }
 
     @Override
@@ -96,27 +102,22 @@ public class OrderServiceImpl implements OrderService {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
-        // Lấy người dùng hiện tại
-        User currentUser = this.getCurrentUser();
+        if(this.checkAuthorization(order)) {
+            // Kiểm tra trạng thái đơn hàng
+            if (order.getStatus() != OrderStatus.PENDING) {
+                throw new BadRequestException("Only orders with PENDING status can be deleted");
+            }
 
-        // Kiểm tra nếu người dùng hiện tại là chủ đơn hàng hoặc có quyền admin
-        if (!order.getUser().equals(currentUser) && !currentUser.getRole().getName().equals("ROLE_ADMIN")) {
-            throw new IllegalStateException("You don't have permission to delete this order");
+            // Xóa tham chiếu đến địa chỉ nếu muốn (không bắt buộc)
+            order.setOrigin(null);
+            order.setDestination(null);
+
+            // Xóa đơn hàng nhưng giữ lại địa chỉ
+            orderRepository.delete(order);
+
+            return "Deleted Order Successfully";
         }
-
-        // Kiểm tra trạng thái đơn hàng
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new BadRequestException("Only orders with PENDING status can be deleted");
-        }
-
-        // Xóa tham chiếu đến địa chỉ nếu muốn (không bắt buộc)
-        order.setOrigin(null);
-        order.setDestination(null);
-
-        // Xóa đơn hàng nhưng giữ lại địa chỉ
-        orderRepository.delete(order);
-
-        return "Deleted Order Successfully";
+        throw new IllegalArgumentException("User is not authorized to delete this order");
     }
 
 
@@ -125,10 +126,66 @@ public class OrderServiceImpl implements OrderService {
     public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
-        order.setStatus(OrderStatus.valueOf(status.toString()));
-        orderRepository.save(order);
-        return OrdersDto.toDto(order);
+            order.setStatus(OrderStatus.valueOf(status.toString()));
+            orderRepository.save(order);
+            return OrdersDto.toDto(order);
     }
+
+    @Override
+    public List<PriceTableDto> showPriceTable(OrdersForm ordersForm) {
+        // Tạo địa chỉ gốc và địa chỉ đích dựa trên thông tin từ OrdersForm
+        Address origin = createOrGetAddress(ordersForm.getOrigin());
+        Address destination = createOrGetAddress(ordersForm.getDestination());
+
+        // Tính khoảng cách giữa hai địa chỉ
+        double distance = ShipFee.calculateDistance(origin, destination);
+
+        // Lấy các thông tin cần thiết
+        int quantity = ordersForm.getQuantity();
+        double weight = ordersForm.getWeight();
+
+        // Tạo bảng giá cho từng phương thức vận chuyển
+        PriceTableDto airTransport = calculatePriceForMethod(TransportMethod.AIR, distance, quantity);
+        PriceTableDto seaTransport = calculatePriceForMethod(TransportMethod.SEA, distance, quantity);
+        PriceTableDto landTransport = calculatePriceForMethod(TransportMethod.LAND, distance, quantity);
+
+        // Trả về danh sách bảng giá
+        return List.of(airTransport, seaTransport, landTransport);
+    }
+
+    private PriceTableDto calculatePriceForMethod(TransportMethod method, double distance, int quantity) {
+        // Tính phí vận chuyển dựa trên phương thức
+        double costPerKm = switch (method) {
+            case AIR -> ShipFee.AIR_RATE_PER_KM;
+            case SEA -> ShipFee.SEA_RATE_PER_KM;
+            case LAND -> ShipFee.LAND_RATE_PER_KM;
+        };
+
+        // Tính phí cơ bản dựa trên khoảng cách và số lượng
+        double baseCost = (distance * costPerKm) * quantity;
+
+        // Tính tổng phí trước VAT
+        double totalCostBeforeVAT = baseCost + ShipFee.ADDITIONAL_SERVICE_FEE;
+
+        // Làm tròn tổng phí trước VAT
+        totalCostBeforeVAT = Math.floor(totalCostBeforeVAT);
+
+        // Tính VAT (8%)
+        double vat = totalCostBeforeVAT * 0.08;
+
+        // Làm tròn VAT
+        vat = Math.floor(vat);
+
+        // Tổng phí bao gồm VAT
+        double totalCost = totalCostBeforeVAT + vat;
+
+        // Trả về bảng giá
+        return PriceTableDto.builder()
+                .method(method)
+                .price(totalCost)
+                .build();
+    }
+
 
     private Address createOrGetAddress(AddressForm addressForm) {
         // Trim the address name
@@ -178,5 +235,11 @@ public class OrderServiceImpl implements OrderService {
     }
     private User getCurrentUser() {
         return userRepository.findByEmail(UserUtils.getMe()).orElseThrow(() -> new IllegalArgumentException("User not sign in"));
+    }
+
+    private boolean checkAuthorization(Orders order) {
+        // Lấy người dùng hiện tại
+        User currentUser = this.getCurrentUser();
+        return order.getUser().equals(currentUser) || currentUser.getRole().getName().equals("ROLE_ADMIN");
     }
 }

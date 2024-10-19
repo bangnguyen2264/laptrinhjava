@@ -7,11 +7,11 @@ import com.project.ShopKoi.model.enums.TransportMethod;
 public class ShipFee {
 
     // Radius of the Earth in kilometers
-    private static final double EARTH_RADIUS_KM = 6371.0;
-    private static final double AIR_RATE_PER_KM = 5000; // Đơn giá vận chuyển bằng đường hàng không
-    private static final double SEA_RATE_PER_KM = 3000;   // Đơn giá vận chuyển bằng đường biển
-    private static final double LAND_RATE_PER_KM = 2000;  // Đơn giá vận chuyển bằng đường bộ
-    private static final double ADDITIONAL_SERVICE_FEE = 50000; // Phí dịch vụ gia tăng (giả định)
+    public static final double EARTH_RADIUS_KM = 6371.0;
+    public static final double AIR_RATE_PER_KM = 5000; // Đơn giá vận chuyển bằng đường hàng không
+    public static final double SEA_RATE_PER_KM = 3000;   // Đơn giá vận chuyển bằng đường biển
+    public static final double LAND_RATE_PER_KM = 2000;  // Đơn giá vận chuyển bằng đường bộ
+    public static final double ADDITIONAL_SERVICE_FEE = 50000; // Phí dịch vụ gia tăng (giả định)
 
     public static double calculate(Orders order) {
         // Tính khoảng cách giữa địa chỉ gốc và địa chỉ đích
@@ -46,7 +46,7 @@ public class ShipFee {
         return Math.floor(totalCost); // Trả về tổng phí đã được làm tròn
     }
 
-    private static double calculateDistance(Address origin, Address destination) {
+    public static double calculateDistance(Address origin, Address destination) {
         double lat1 = Math.toRadians(origin.getLatitude());
         double lng1 = Math.toRadians(origin.getLongitude());
         double lat2 = Math.toRadians(destination.getLatitude());

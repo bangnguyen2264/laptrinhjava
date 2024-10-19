@@ -7,6 +7,7 @@ import com.project.ShopKoi.model.form.UpdatePasswordForm;
 import com.project.ShopKoi.repository.UserRepository;
 import com.project.ShopKoi.service.UserService;
 import com.project.ShopKoi.utils.UserUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,23 +16,22 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private  PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDto getInfomationUser(Principal connectedUser) {
-        User user = userRepository.findByEmail(connectedUser.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDto getInfomationUser() {
+        User user = userRepository.findByEmail(UserUtils.getMe())
+                .orElseThrow(() -> new IllegalArgumentException("User not sign in"));
         return UserDto.toDto(user);
     }
 
     @Override
-    public UserDto updateInformationUser(Principal connectedUser, UpdateInformationUserForm form) {
-        User user = userRepository.findByEmail(connectedUser.getName())
+    public UserDto updateInformationUser( UpdateInformationUserForm form) {
+        User user = userRepository.findByEmail(UserUtils.getMe())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         if (form.getFullName() != null) {
             user.setFullName(form.getFullName());
