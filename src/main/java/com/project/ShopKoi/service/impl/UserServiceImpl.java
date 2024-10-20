@@ -1,19 +1,21 @@
 package com.project.ShopKoi.service.impl;
 
+import com.project.ShopKoi.model.entity.Role;
 import com.project.ShopKoi.model.form.UpdateInformationUserForm;
 import com.project.ShopKoi.model.dto.UserDto;
 import com.project.ShopKoi.model.entity.User;
 import com.project.ShopKoi.model.form.UpdatePasswordForm;
+import com.project.ShopKoi.repository.OrdersRepository;
+import com.project.ShopKoi.repository.RoleRepository;
 import com.project.ShopKoi.repository.UserRepository;
 import com.project.ShopKoi.service.UserService;
 import com.project.ShopKoi.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Override
     public UserDto getInfomationUser() {
@@ -62,6 +65,23 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
         return "Password changed successfully";
+    }
+    @Override
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserDto::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDto> getAllUsersByRole(String roleName) {
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
+
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole().equals(role)) // Lọc theo vai trò
+                .map(UserDto::toDto)
+                .collect(Collectors.toList());
     }
 
 }

@@ -3,6 +3,7 @@ package com.project.ShopKoi.controller;
 import com.project.ShopKoi.model.dto.UserDto;
 import com.project.ShopKoi.model.enums.OrderStatus;
 import com.project.ShopKoi.service.impl.AdminServiceImpl;
+import com.project.ShopKoi.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,16 +15,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminServiceImpl adminServiceImpl;
+    private final UserServiceImpl userServiceImpl;
 
 
     @GetMapping("users")
     public ResponseEntity<List<UserDto>> getAllUsers() {
-        return ResponseEntity.ok(adminServiceImpl.getAllUsers());
+        return ResponseEntity.ok(userServiceImpl.getAllUsers());
     }
 
     @GetMapping("/users/{roleName}")
     public ResponseEntity<List<UserDto>> getUsersByRole(@PathVariable String roleName) {
-        List<UserDto> users = adminServiceImpl.getAllUsersByRole(roleName);
+        List<UserDto> users = userServiceImpl.getAllUsersByRole(roleName);
         return ResponseEntity.ok(users);
     }
     @PutMapping("/change-role/{userId}")
