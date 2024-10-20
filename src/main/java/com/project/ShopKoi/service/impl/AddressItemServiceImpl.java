@@ -11,9 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +26,10 @@ public class AddressItemServiceImpl implements AddressItemService {
     private final AddressItemRepository addressItemRepository;
 
     @Override
-    @Cacheable(value = "address_item")
-    public List<AddressItemDto> findAllAddressItems() {
-        return addressItemRepository.findAll().stream()
+    @Transactional
+    public List<AddressItemDto> findAllAddressItems(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return addressItemRepository.findAll(pageable).stream()
                 .map(AddressItemDto::toDto)
                 .toList();
     }
@@ -40,6 +45,11 @@ public class AddressItemServiceImpl implements AddressItemService {
     @Override
     @CachePut(value = "address_item", key = "#result.id")
     public AddressItemDto addAddressItem(AddressItemForm addressItemForm) {
+        // Kiểm tra xem addressClass có hợp lệ không
+        if (addressItemForm.getAddressClass() == null) {
+            throw new IllegalArgumentException("Address class must not be null");
+        }
+
         AddressItem addressItem = toEntity(addressItemForm);
         addressItemRepository.save(addressItem);
         return AddressItemDto.toDto(addressItem);
@@ -48,14 +58,24 @@ public class AddressItemServiceImpl implements AddressItemService {
     @Override
     @CacheEvict(value = "address_item", allEntries = true)
     public List<AddressItemDto> addAllAddressItem(List<AddressItemForm> addressItemForms) {
+        if (addressItemForms == null || addressItemForms.isEmpty()) {
+            throw new IllegalArgumentException("Address item forms must not be null or empty");
+        }
+
+        // Chuyển đổi từ AddressItemForm sang AddressItem
         List<AddressItem> addressItems = addressItemForms.stream()
                 .map(this::toEntity)
                 .toList();
+
+        // Lưu tất cả vào cơ sở dữ liệu
         addressItemRepository.saveAll(addressItems);
+
+        // Chuyển đổi và trả về AddressItemDto
         return addressItems.stream()
                 .map(AddressItemDto::toDto)
                 .toList();
     }
+
 
     @Override
     @Cacheable(value = "address_item", key = "#parentId")
@@ -84,6 +104,12 @@ public class AddressItemServiceImpl implements AddressItemService {
     public AddressItemDto updateAddressItem(Long id, AddressItemForm addressItemForm) {
         AddressItem addressItem = addressItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Address item with id " + id + " not found"));
+
+        // Kiểm tra xem addressClass có hợp lệ không
+        if (addressItemForm.getAddressClass() == null) {
+            throw new IllegalArgumentException("Address class must not be null");
+        }
+
         updateAddressItemFromForm(addressItem, addressItemForm);
         addressItemRepository.save(addressItem);
         return AddressItemDto.toDto(addressItem);
@@ -121,4 +147,3 @@ public class AddressItemServiceImpl implements AddressItemService {
                         .orElseThrow(() -> new NotFoundException("Address item with parent id " + parentId + " not found"));
     }
 }
-

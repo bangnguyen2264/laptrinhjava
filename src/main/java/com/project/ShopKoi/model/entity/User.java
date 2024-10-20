@@ -30,7 +30,6 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
     private String phone;
-    private String address;
     private String password;
     @ManyToOne(fetch = FetchType.EAGER)
     private Role role;

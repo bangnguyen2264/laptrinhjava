@@ -83,6 +83,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrdersDto getOrderByOrderNumber(UUID orderNumber) {
+        Orders orders = orderRepository
+                .findByOrderNumber(orderNumber)
+                .orElseThrow(()-> new NotFoundException("Order with order number " + orderNumber + " not found"));
+        return OrdersDto.toDto(orders);
+    }
+
+    @Override
     public List<OrdersDto> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(OrdersDto::toDto)

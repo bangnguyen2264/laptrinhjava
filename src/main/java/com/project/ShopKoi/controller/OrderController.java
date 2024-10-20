@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/order")
 @RequiredArgsConstructor
@@ -49,5 +51,10 @@ public class OrderController {
     @PostMapping("/price-table")
     public ResponseEntity getTablePrice(@RequestBody OrdersForm ordersForm) {
         return ResponseEntity.ok(orderService.showPriceTable(ordersForm));
+    }
+
+    @GetMapping("/number/{orderNumber}")
+    public ResponseEntity findOrderByOrderNumber(@PathVariable UUID  orderNumber) {
+        return ResponseEntity.ok(orderService.getOrderByOrderNumber(orderNumber));
     }
 }

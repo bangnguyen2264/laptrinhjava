@@ -4,11 +4,12 @@ import com.project.ShopKoi.model.dto.AddressItemDto;
 import com.project.ShopKoi.model.enums.AddressClass;
 import com.project.ShopKoi.model.form.AddressItemForm;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 public interface AddressItemService {
 
-    List<AddressItemDto> findAllAddressItems();
+    List<AddressItemDto> findAllAddressItems(int page, int size);
     AddressItemDto findAddressItemById(Long id);
     AddressItemDto addAddressItem(AddressItemForm addressItemForm);
     List<AddressItemDto> addAllAddressItem(List<AddressItemForm> addressItem);

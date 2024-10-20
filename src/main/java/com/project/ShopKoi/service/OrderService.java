@@ -7,10 +7,12 @@ import com.project.ShopKoi.model.form.FeedbackForm;
 import com.project.ShopKoi.model.form.OrdersForm;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface OrderService {
     OrdersDto createOrder(OrdersForm orderForm);
     OrdersDto getOrderById(Long id);
+    OrdersDto getOrderByOrderNumber(UUID orderNumber);
     List<OrdersDto> getAllOrders();
     List<OrdersDto> getMyOrder();
     String deleteOrder(Long id);

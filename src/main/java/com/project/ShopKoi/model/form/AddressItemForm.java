@@ -1,18 +1,17 @@
 package com.project.ShopKoi.model.form;
 
 import com.project.ShopKoi.model.enums.AddressClass;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AddressItemForm {
-    @NotBlank
-    private String name;
-    @NotBlank
-    private AddressClass addressClass;
-    private double longitude;
-    private double latitude;
-    private Long parentId;
-
+    private String name;             // Tên của địa chỉ
+    private AddressClass addressClass; // Enum cho địa chỉ
+    private double longitude;        // Kinh độ
+    private double latitude;         // Vĩ độ
+    private Long parentId;          // ID của địa chỉ cha
 }

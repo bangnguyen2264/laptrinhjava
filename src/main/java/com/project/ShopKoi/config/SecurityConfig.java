@@ -39,7 +39,7 @@ public class    SecurityConfig {
                         // Cấu hình cho API đơn hàng
                         .requestMatchers(HttpMethod.POST, "/api/v1/order").authenticated() // Người dùng đã đăng nhập có thể tạo đơn hàng
                         .requestMatchers(HttpMethod.GET, "/api/v1/order/me").authenticated() // Người dùng đã đăng nhập có thể xem đơn hàng của mình
-                        .requestMatchers(HttpMethod.GET, "/api/v1/order").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xem tất cả đơn hàng
+                        .requestMatchers(HttpMethod.GET, "/api/v1/order","/api/v1/order/number/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xem tất cả đơn hàng
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/order/change-status/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể thay đổi trạng thái đơn hàng
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/order/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xóa đơn hàng
                         // Cấu hình quyền cho người dùng

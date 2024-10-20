@@ -18,8 +18,11 @@ public class AddressItemController {
     private final AddressItemService addressItemService;
 
     @GetMapping
-    public ResponseEntity<List<AddressItemDto>> getAllAddressItems() {
-        List<AddressItemDto> addressItems = addressItemService.findAllAddressItems();
+    public ResponseEntity<List<AddressItemDto>> getAllAddressItems(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        List<AddressItemDto> addressItems = addressItemService.findAllAddressItems(page, size);
         return ResponseEntity.ok(addressItems);
     }
 

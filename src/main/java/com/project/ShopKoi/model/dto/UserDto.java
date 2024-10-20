@@ -27,7 +27,6 @@ public class UserDto {
                 .dob(user.getDob())
                 .email(user.getEmail())
                 .phone(user.getPhone())
-                .address(user.getAddress())
                 .build();
     }
 }
