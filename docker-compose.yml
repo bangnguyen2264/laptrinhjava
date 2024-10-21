@@ -1,5 +1,19 @@
 version: '3.8'
 services:
+  # ShopKoi Business Service
+  koi_bus:
+    image: henryngyn2264/shopkoi:v.1.0
+    container_name: ShopKoi_Service
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/shop-koi
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+    ports:
+      - "8081:8081"
+    depends_on:
+      - koi_db
+    networks:
+      - koi-network
   # PostgreSQL Database Service
   koi_db:
     image: postgres:13-alpine
@@ -25,10 +39,11 @@ services:
       - koi-network
     volumes:
       - redis_data:/data
-
+# Volume for persistent PostgreSQL and Redis storage
 volumes:
   db_data:
   redis_data:
 
 networks:
   koi-network:
+    driver: bridge
