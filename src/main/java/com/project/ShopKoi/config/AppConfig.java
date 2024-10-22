@@ -35,9 +35,12 @@ public class AppConfig {
             if (!roleRepository.existsByName("ROLE_ADMIN")) {
                 roleRepository.save(Role.builder().id(2L).name("ROLE_ADMIN").build());
             }
+            if (!roleRepository.existsByName("ROLE_DELIVER")) {
+                roleRepository.save(Role.builder().id(3L).name("ROLE_DELIVER").build());
+            }
             log.info("Roles initialized successfully");
 
-            Role userRole = roleRepository.findById(1L).orElseThrow();
+            Role deliverRole = roleRepository.findById(3L).orElseThrow();
             Role adminRole = roleRepository.findById(2L).orElseThrow();
 
             if (!userRepository.existsByEmail("admin@gmail.com")) {
@@ -51,6 +54,31 @@ public class AppConfig {
                                 .build()
                 );
                 log.info("Admin initialized successfully");
+            }
+
+            if (!userRepository.existsByEmail("deliver1@gmail.com")) {
+                userRepository.save(
+                        User.builder()
+                                .id(3L)
+                                .fullName("deliver1")
+                                .email("deliver1@gmail.com")
+                                .password(passwordEncoder.encode("deliver"))
+                                .role(deliverRole)
+                                .build()
+                );
+                log.info("Deliver 1 initialized successfully");
+            }
+            if (!userRepository.existsByEmail("deliver2@gmail.com")) {
+                userRepository.save(
+                        User.builder()
+                                .id(4L)
+                                .fullName("deliver2")
+                                .email("deliver2@gmail.com")
+                                .password(passwordEncoder.encode("deliver"))
+                                .role(deliverRole)
+                                .build()
+                );
+                log.info("Admin 2 initialized successfully");
             }
             if(!addressItemRepository.existsByName("Việt Nam")) {
                 addressItemRepository.saveAll(List.of(

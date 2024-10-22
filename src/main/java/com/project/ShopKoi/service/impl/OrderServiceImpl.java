@@ -110,17 +110,14 @@ public class OrderServiceImpl implements OrderService {
         // Tìm đơn hàng theo id
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
-
         if(this.checkAuthorization(order)) {
             // Kiểm tra trạng thái đơn hàng
             if (order.getStatus() != OrderStatus.PENDING) {
                 throw new BadRequestException("Only orders with PENDING status can be deleted");
             }
-
             // Xóa tham chiếu đến địa chỉ nếu muốn (không bắt buộc)
             order.setOrigin(null);
             order.setDestination(null);
-
             // Xóa đơn hàng nhưng giữ lại địa chỉ
             orderRepository.delete(order);
 
@@ -132,14 +129,10 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public OrdersDto changeStatusOrder(Long id, OrderStatus status, FeedbackForm feedbackForm) {
+    public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
             order.setStatus(OrderStatus.valueOf(status.toString()));
-            if (status == OrderStatus.COMPLETED ) {
-                order.setRating(feedbackForm.getRating());
-                order.setFeedbackMessage(feedbackForm.getFeedbackMessage());
-            }
             orderRepository.save(order);
             return OrdersDto.toDto(order);
     }
@@ -165,6 +158,68 @@ public class OrderServiceImpl implements OrderService {
         // Trả về danh sách bảng giá
         return List.of(airTransport, seaTransport, landTransport);
     }
+
+    @Override
+    public void sendFeedback(Long id, FeedbackForm feedbackForm) {
+        Orders order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
+        if (order.getStatus() == OrderStatus.COMPLETED ) {
+            order.setRating(feedbackForm.getRating());
+            order.setFeedbackMessage(feedbackForm.getFeedbackMessage());
+            orderRepository.save(order);
+        }
+    throw new BadRequestException("The order does not completed");
+    }
+
+    @Override
+    public List<OrdersDto> getMyDeliverOrder() {
+        User user = this.getCurrentUser();
+        return user.getDeliveryOrders().stream().map(OrdersDto::toDto).toList();
+    }
+
+    @Override
+    public void assignDelivery(Long orderId, Long deliveryId) {
+        User deliver = userRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException("Delivery order not found"));
+        Orders order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
+        if (order.getDeliver() == null)
+        {
+            order.setDeliver(deliver);
+            deliver.getDeliveryOrders().add(order);
+            orderRepository.save(order);
+            userRepository.save(deliver);
+        }
+        else {
+            throw new BadRequestException("Delivery order already assigned");
+        }
+    }
+
+    @Override
+    public void updateDelivery(Long orderId, Long deliveryId) {
+        // Lấy thông tin nhân viên giao hàng mới
+        User newDeliver = userRepository.findById(deliveryId)
+                .orElseThrow(() -> new NotFoundException("Delivery order not found"));
+
+        // Lấy thông tin đơn hàng
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        // Kiểm tra xem đơn hàng đã được gán cho nhân viên giao hàng nào chưa
+        User currentDeliver = order.getDeliver();
+
+        if (currentDeliver != null) {
+            // Nếu đơn hàng đã có nhân viên giao hàng cũ, loại bỏ đơn hàng khỏi danh sách của họ
+            currentDeliver.getDeliveryOrders().remove(order);
+            userRepository.save(currentDeliver); // Cập nhật thông tin nhân viên giao hàng cũ
+        }
+
+        // Gán đơn hàng cho nhân viên giao hàng mới
+        order.setDeliver(newDeliver);
+        newDeliver.getDeliveryOrders().add(order);
+
+        // Lưu thay đổi
+        orderRepository.save(order);
+        userRepository.save(newDeliver);
+    }
+
 
     private PriceTableDto calculatePriceForMethod(TransportMethod method, double distance, int quantity) {
         // Tính phí vận chuyển dựa trên phương thức

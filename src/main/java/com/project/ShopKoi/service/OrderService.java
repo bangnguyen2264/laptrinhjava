@@ -14,9 +14,15 @@ public interface OrderService {
     OrdersDto getOrderById(Long id);
     OrdersDto getOrderByOrderNumber(UUID orderNumber);
     List<OrdersDto> getAllOrders();
+    OrdersDto changeStatusOrder(Long id, OrderStatus status);
     List<OrdersDto> getMyOrder();
     String deleteOrder(Long id);
-    OrdersDto changeStatusOrder(Long id, OrderStatus status, FeedbackForm feedbackForm);
     List<PriceTableDto> showPriceTable(OrdersForm ordersForm);
+    void sendFeedback(Long id, FeedbackForm feedbackForm);
+    List<OrdersDto> getMyDeliverOrder();
+    void assignDelivery(Long orderId, Long deliveryId);
+    void updateDelivery(Long orderId, Long deliveryId);
+
+
 
 }

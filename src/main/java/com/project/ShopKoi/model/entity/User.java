@@ -35,6 +35,8 @@ public class User implements UserDetails {
     private Role role;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Orders> orders;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Orders> deliveryOrders;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
