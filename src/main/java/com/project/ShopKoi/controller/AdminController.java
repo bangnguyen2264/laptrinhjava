@@ -28,9 +28,9 @@ public class AdminController {
         List<UserDto> users = userServiceImpl.getAllUsersByRole(roleName);
         return ResponseEntity.ok(users);
     }
-    @PutMapping("/change-role/{userId}")
-    public ResponseEntity<String> updateUserRole(@PathVariable Long userId) {
-        String response = adminServiceImpl.changeUserRole(userId);
+    @PutMapping("/change-role/{userId}/{roleName}")
+    public ResponseEntity<String> updateUserRole(@PathVariable Long userId,@PathVariable String roleName) {
+        String response = adminServiceImpl.changeUserRole(userId, roleName );
         return ResponseEntity.ok(response);
     }
 

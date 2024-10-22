@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface AdminService {
-    String changeUserRole(Long id);
+
+    String changeUserRole(Long id,String roleName);
     Map<String, Long> getUserStatistics();
     Map<OrderStatus, Long> getOrderStatistics();
 }
