@@ -27,9 +27,9 @@ spring:
     type: redis
   data:
     redis:
-      host: cache  # Correctly points to the Redis service inside Docker
+      host: localhost
       port: 6379
-      timeout: 1000ms
+      timeout: 6000
 
 app:
   security:

@@ -35,7 +35,7 @@ public class AddressItemServiceImpl implements AddressItemService {
     }
 
     @Override
-    @Cacheable(value = "address_item", key = "#id")
+    @Cacheable(value = "address_item", key = "#id", unless = "#result == null")
     public AddressItemDto findAddressItemById(Long id) {
         return addressItemRepository.findById(id)
                 .map(AddressItemDto::toDto)
@@ -43,9 +43,8 @@ public class AddressItemServiceImpl implements AddressItemService {
     }
 
     @Override
-    @CachePut(value = "address_item", key = "#result.id")
+    @CachePut(value = "address_item", key = "#result.id", unless = "#result == null")
     public AddressItemDto addAddressItem(AddressItemForm addressItemForm) {
-        // Kiểm tra xem addressClass có hợp lệ không
         if (addressItemForm.getAddressClass() == null) {
             throw new IllegalArgumentException("Address class must not be null");
         }
@@ -62,23 +61,18 @@ public class AddressItemServiceImpl implements AddressItemService {
             throw new IllegalArgumentException("Address item forms must not be null or empty");
         }
 
-        // Chuyển đổi từ AddressItemForm sang AddressItem
         List<AddressItem> addressItems = addressItemForms.stream()
                 .map(this::toEntity)
                 .toList();
 
-        // Lưu tất cả vào cơ sở dữ liệu
         addressItemRepository.saveAll(addressItems);
-
-        // Chuyển đổi và trả về AddressItemDto
         return addressItems.stream()
                 .map(AddressItemDto::toDto)
                 .toList();
     }
 
-
     @Override
-    @Cacheable(value = "address_item", key = "#parentId")
+    @Cacheable(value = "address_item_by_parent", key = "#parentId", unless = "#result == null or #result.isEmpty()")
     public List<AddressItemDto> findAddressItemByParentId(Long parentId) {
         return addressItemRepository.findAddressItemByParentId(parentId)
                 .stream()
@@ -100,12 +94,11 @@ public class AddressItemServiceImpl implements AddressItemService {
     }
 
     @Override
-    @CachePut(value = "address_item", key = "#result.id")
+    @CachePut(value = "address_item", key = "#id", unless = "#result == null")
     public AddressItemDto updateAddressItem(Long id, AddressItemForm addressItemForm) {
         AddressItem addressItem = addressItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Address item with id " + id + " not found"));
 
-        // Kiểm tra xem addressClass có hợp lệ không
         if (addressItemForm.getAddressClass() == null) {
             throw new IllegalArgumentException("Address class must not be null");
         }

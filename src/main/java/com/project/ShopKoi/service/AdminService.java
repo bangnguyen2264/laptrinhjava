@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface AdminService {
-    public String changeUserRole(Long id);
-    public Map<String, Long> getUserStatistics();
-    public Map<OrderStatus, Long> getOrderStatistics();
+    String changeUserRole(Long id);
+    Map<String, Long> getUserStatistics();
+    Map<OrderStatus, Long> getOrderStatistics();
 }

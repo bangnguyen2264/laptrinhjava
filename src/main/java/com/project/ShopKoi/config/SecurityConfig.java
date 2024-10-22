@@ -16,6 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -41,7 +46,7 @@ public class    SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/order/me").authenticated() // Người dùng đã đăng nhập có thể xem đơn hàng của mình
                         .requestMatchers(HttpMethod.GET, "/api/v1/order","/api/v1/order/number/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xem tất cả đơn hàng
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/order/change-status/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể thay đổi trạng thái đơn hàng
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xóa đơn hàng
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order/**").authenticated()
                         // Cấu hình quyền cho người dùng
                         .requestMatchers("/api/v1/user/**").authenticated()
                         // Cấu hình quyền cho admin
@@ -49,6 +54,15 @@ public class    SecurityConfig {
                         // Các yêu cầu còn lại yêu cầu xác thực
                         .anyRequest().authenticated()
                 )
+                .cors(cors -> cors
+                .configurationSource(request -> {
+                    CorsConfiguration cfg = new CorsConfiguration();
+                    cfg.setAllowedOrigins(Collections.singletonList("*"));
+                    cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    cfg.setAllowedHeaders(List.of("*"));
+                    return cfg;
+                })
+        )
                 .userDetailsService(userDetailsService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
