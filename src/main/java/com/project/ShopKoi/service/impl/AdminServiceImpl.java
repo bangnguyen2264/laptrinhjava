@@ -28,19 +28,19 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
-    public String changeUserRole(Long userId) {
+    public String changeUserRole(Long userId, String roleName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!user.getRole().getName().equals("ROLE_USER")) {
-            return "User does not have ROLE_USER"; // Trả về thông báo nếu không phải ROLE_USER
+            return "User does not have ROLE_USER";
         }
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                .orElseThrow(() -> new IllegalArgumentException("Admin role not found"));
+        Role newRole = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
-        user.setRole(adminRole);
+        user.setRole(newRole);
         userRepository.save(user);
-        return "User role updated to ROLE_ADMIN successfully";
+        return "User role updated to " + roleName + "successfully";
     }
 
     @Override
