@@ -2,6 +2,7 @@ package com.project.ShopKoi.service.impl;
 
 import com.project.ShopKoi.exception.BadRequestException;
 import com.project.ShopKoi.exception.NotFoundException;
+import com.project.ShopKoi.exception.UnauthorizationException;
 import com.project.ShopKoi.model.dto.OrdersDto;
 import com.project.ShopKoi.model.dto.PriceTableDto;
 import com.project.ShopKoi.model.entity.Address;
@@ -22,6 +23,8 @@ import com.project.ShopKoi.utils.ShipFee;
 import com.project.ShopKoi.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,8 +94,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrdersDto> getAllOrders() {
-        return orderRepository.findAll().stream()
+    public List<OrdersDto> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepository.findAll(pageable).stream()
                 .map(OrdersDto::toDto)
                 .toList();
     }
@@ -104,6 +108,22 @@ public class OrderServiceImpl implements OrderService {
                 .map(OrdersDto::toDto)
                 .toList();
     }
+
+    @Override
+    public OrdersDto getMyOrderById(Long id) {
+        // Lấy thông tin người dùng đã đăng nhập hiện tại
+        User currentUser = this.getCurrentUser();
+        // Tìm đơn hàng theo ID
+        Orders order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + id));
+        // Kiểm tra xem người dùng có phải chủ sở hữu đơn hàng không
+        if (!checkCurrentUser(order)) {
+            throw new BadRequestException("Order with ID: " + id + " not in your storage");
+        }
+        // Chuyển đổi Orders entity thành OrdersDto và trả về
+        return OrdersDto.toDto(order);
+    }
+
 
     @Override
     public String deleteOrder(Long id) {
@@ -130,9 +150,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
+
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
+        if (!checkDeliver(order)){
+            throw new BadRequestException("Order with ID: " + id + " not in your storage");
+        }
             order.setStatus(OrderStatus.valueOf(status.toString()));
+
             orderRepository.save(order);
             return OrdersDto.toDto(order);
     }
@@ -161,7 +186,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void sendFeedback(Long id, FeedbackForm feedbackForm) {
+
         Orders order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
+        if (!checkCurrentUser(order)){
+            throw new UnauthorizationException("User is not owner the order to send this feedback");
+        }
         if (order.getStatus() == OrderStatus.COMPLETED ) {
             order.setRating(feedbackForm.getRating());
             order.setFeedbackMessage(feedbackForm.getFeedbackMessage());
@@ -173,18 +202,20 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrdersDto> getMyDeliverOrder() {
         User user = this.getCurrentUser();
-        return user.getDeliveryOrders().stream().map(OrdersDto::toDto).toList();
+        List<Orders> ordersList = user.getDeliveryOrders();
+        log.info("Delivery orders: {}", ordersList);
+        return ordersList.stream().map(OrdersDto::toDto).toList();
     }
 
     @Override
     public void assignDelivery(Long orderId, Long deliveryId) {
         User deliver = userRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException("Delivery order not found"));
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
-        if (order.getDeliver() == null)
+        if (order.getDeliver() == null && !deliver.getDeliveryOrders().contains(order))
         {
             order.setDeliver(deliver);
-            deliver.getDeliveryOrders().add(order);
             orderRepository.save(order);
+            deliver.getDeliveryOrders().add(order);
             userRepository.save(deliver);
         }
         else {
@@ -213,10 +244,9 @@ public class OrderServiceImpl implements OrderService {
 
         // Gán đơn hàng cho nhân viên giao hàng mới
         order.setDeliver(newDeliver);
-        newDeliver.getDeliveryOrders().add(order);
-
-        // Lưu thay đổi
         orderRepository.save(order);
+
+        newDeliver.getDeliveryOrders().add(order);
         userRepository.save(newDeliver);
     }
 
@@ -308,6 +338,14 @@ public class OrderServiceImpl implements OrderService {
     private boolean checkAuthorization(Orders order) {
         // Lấy người dùng hiện tại
         User currentUser = this.getCurrentUser();
-        return order.getUser().equals(currentUser) || currentUser.getRole().getName().equals("ROLE_ADMIN");
+        return currentUser.getRole().getName().equals("ROLE_ADMIN") || currentUser.getRole().getName().equals("ROLE_DELIVER");
+    }
+    private boolean checkCurrentUser(Orders order) {
+        User currentUser = this.getCurrentUser();
+        return order.getUser().equals(currentUser) ;
+    }
+    private boolean checkDeliver(Orders orders){
+        User currentUser = this.getCurrentUser();
+        return orders.getDeliver().equals(currentUser);
     }
 }

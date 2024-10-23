@@ -25,7 +25,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class    SecurityConfig {
+public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsServiceImpl userDetailsService;
@@ -42,34 +42,34 @@ public class    SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/address-items/**").hasAnyAuthority("ROLE_ADMIN")
                         // Cấu hình cho API đơn hàng
-                        .requestMatchers(HttpMethod.POST, "/api/v1/order").authenticated() // Người dùng đã đăng nhập có thể tạo đơn hàng
-                        .requestMatchers(HttpMethod.GET, "/api/v1/order/me").authenticated() // Người dùng đã đăng nhập có thể xem đơn hàng của mình
-                        .requestMatchers(HttpMethod.GET, "/api/v1/order","/api/v1/order/number/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xem tất cả đơn hàng
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/order/change-status/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể thay đổi trạng thái đơn hàng
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/order").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/order/me/").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/order", "/api/v1/order/number/**").hasAnyAuthority("ROLE_ADMIN") // Admin có thể xem tất cả đơn hàng
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/order/change-status/**").hasAnyAuthority("ROLE_ADMIN","ROLE_DELIVER") // Admin có thể thay đổi trạng thái đơn hàng
+                        .requestMatchers("/api/v1/order/deliver/**").hasAnyAuthority("ROLE_DELIVER", "ROLE_ADMIN") // Nhân viên giao hàng và Admin có thể cập nhật trạng thái giao hàng
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER") // Admin có thể xóa đơn hàng
                         // Cấu hình quyền cho người dùng
                         .requestMatchers("/api/v1/user/**").authenticated()
-                        // Cấu hình quyền cho admin
-                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN")
+                        // Cấu hình quyền cho Admin
+                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN") // Chỉ Admin có quyền truy cập các API admin
                         // Các yêu cầu còn lại yêu cầu xác thực
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors
-                .configurationSource(request -> {
-                    CorsConfiguration cfg = new CorsConfiguration();
-                    cfg.setAllowedOrigins(Collections.singletonList("*"));
-                    cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    cfg.setAllowedHeaders(List.of("*"));
-                    return cfg;
-                })
-        )
+                        .configurationSource(request -> {
+                            CorsConfiguration cfg = new CorsConfiguration();
+                            cfg.setAllowedOrigins(Collections.singletonList("*"));
+                            cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                            cfg.setAllowedHeaders(List.of("*"));
+                            return cfg;
+                        })
+                )
                 .userDetailsService(userDetailsService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 
     private String[] getPublicEndpoints() {
         return new String[]{

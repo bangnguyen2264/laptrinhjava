@@ -34,6 +34,7 @@ public class AddressItemServiceImpl implements AddressItemService {
                 .toList();
     }
 
+
     @Override
     @Cacheable(value = "address_item", key = "#id", unless = "#result == null")
     public AddressItemDto findAddressItemById(Long id) {
@@ -43,7 +44,7 @@ public class AddressItemServiceImpl implements AddressItemService {
     }
 
     @Override
-    @CachePut(value = "address_item", key = "#result.id", unless = "#result == null")
+    @CachePut(value = "address_item", key = "#result.id")
     public AddressItemDto addAddressItem(AddressItemForm addressItemForm) {
         if (addressItemForm.getAddressClass() == null) {
             throw new IllegalArgumentException("Address class must not be null");
@@ -55,8 +56,7 @@ public class AddressItemServiceImpl implements AddressItemService {
     }
 
     @Override
-    @CacheEvict(value = "address_item", allEntries = true)
-    public List<AddressItemDto> addAllAddressItem(List<AddressItemForm> addressItemForms) {
+    public String addAllAddressItem(List<AddressItemForm> addressItemForms) {
         if (addressItemForms == null || addressItemForms.isEmpty()) {
             throw new IllegalArgumentException("Address item forms must not be null or empty");
         }
@@ -66,9 +66,7 @@ public class AddressItemServiceImpl implements AddressItemService {
                 .toList();
 
         addressItemRepository.saveAll(addressItems);
-        return addressItems.stream()
-                .map(AddressItemDto::toDto)
-                .toList();
+        return "All address items added successfully";
     }
 
     @Override

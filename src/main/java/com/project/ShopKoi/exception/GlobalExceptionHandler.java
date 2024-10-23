@@ -83,4 +83,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(UnauthorizationException.class)
+    public ResponseEntity<ErrorDetailsDto> handleUnauthorizationException(UnauthorizationException exception,
+                                                                          WebRequest webRequest){
+        ErrorDetailsDto errorDetails = new ErrorDetailsDto(
+                new Date(),
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                exception.getMessage(),
+                webRequest.getDescription(false)
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
 }

@@ -32,8 +32,11 @@ public class OrderController {
 
     // Lấy tất cả đơn hàng
     @GetMapping
-    public ResponseEntity getAllOrder(){
-        return ResponseEntity.ok(orderService.getAllOrders());
+    public ResponseEntity getAllOrder(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        return ResponseEntity.ok(orderService.getAllOrders(page, size));
     }
 
     // Lấy đơn hàng theo ID
@@ -74,15 +77,15 @@ public class OrderController {
     }
 
     // Gán đơn hàng cho nhân viên giao hàng
-    @PostMapping("/{orderId}/assign-delivery/{deliveryId}")
-    public ResponseEntity assignDelivery(@PathVariable Long orderId, @PathVariable Long deliveryId) {
+    @PostMapping("/deliver/{orderId}")
+    public ResponseEntity assignDelivery(@PathVariable Long orderId, @RequestParam Long deliveryId) {
         orderService.assignDelivery(orderId, deliveryId);
         return ResponseEntity.ok("Delivery assigned successfully");
     }
 
     // Cập nhật nhân viên giao hàng cho đơn hàng
-    @PutMapping("/{orderId}/update-delivery/{deliveryId}")
-    public ResponseEntity updateDelivery(@PathVariable Long orderId, @PathVariable Long deliveryId) {
+    @PutMapping("/deliver/update/{orderId}")
+    public ResponseEntity updateDelivery(@PathVariable Long orderId, @RequestParam Long deliveryId) {
         orderService.updateDelivery(orderId, deliveryId);
         return ResponseEntity.ok("Delivery updated successfully");
     }
@@ -91,5 +94,10 @@ public class OrderController {
     @GetMapping("/deliver/me")
     public ResponseEntity getMyDeliverOrder() {
         return ResponseEntity.ok(orderService.getMyDeliverOrder());
+    }
+
+    @GetMapping("/me/{orderId}")
+    public ResponseEntity getMyOrderById(@PathVariable Long orderId){
+        return ResponseEntity.ok(orderService.getMyOrderById(orderId));
     }
 }

@@ -31,7 +31,7 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @PostMapping("/update-password")
+    @PatchMapping("/update-password")
     public ResponseEntity<String> updateUserPassword(@RequestBody UpdatePasswordForm updatePasswordForm) {
         String responseMessage = userService.updatePassword(updatePasswordForm);
         return ResponseEntity.ok(responseMessage);

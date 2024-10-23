@@ -13,9 +13,10 @@ public interface OrderService {
     OrdersDto createOrder(OrdersForm orderForm);
     OrdersDto getOrderById(Long id);
     OrdersDto getOrderByOrderNumber(UUID orderNumber);
-    List<OrdersDto> getAllOrders();
+    List<OrdersDto> getAllOrders(int page, int size);
     OrdersDto changeStatusOrder(Long id, OrderStatus status);
     List<OrdersDto> getMyOrder();
+    OrdersDto getMyOrderById(Long id);
     String deleteOrder(Long id);
     List<PriceTableDto> showPriceTable(OrdersForm ordersForm);
     void sendFeedback(Long id, FeedbackForm feedbackForm);

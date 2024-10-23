@@ -33,15 +33,13 @@ public class AddressItemController {
     }
 
     @PostMapping
-    public ResponseEntity<AddressItemDto> addAddressItem(@RequestBody @Valid AddressItemForm addressItemForm) {
-        AddressItemDto newAddressItem = addressItemService.addAddressItem(addressItemForm);
-        return ResponseEntity.ok(newAddressItem);
+    public ResponseEntity addAddressItem(@RequestBody @Valid AddressItemForm addressItemForm) {
+        return ResponseEntity.ok(addressItemService.addAddressItem(addressItemForm));
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<List<AddressItemDto>> addAllAddressItems(@RequestBody List<AddressItemForm> addressItemForms) {
-        List<AddressItemDto> newAddressItems = addressItemService.addAllAddressItem(addressItemForms);
-        return ResponseEntity.ok(newAddressItems);
+    public ResponseEntity addAllAddressItems(@RequestBody List<AddressItemForm> addressItemForms) {
+        return ResponseEntity.ok(addressItemService.addAllAddressItem(addressItemForms));
     }
 
     @GetMapping("/parent/{parentId}")

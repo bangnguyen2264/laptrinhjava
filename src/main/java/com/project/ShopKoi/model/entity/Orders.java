@@ -46,10 +46,9 @@ public class Orders extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "deliver_id")
     private User deliver;
-
     private String feedbackMessage;
     private double rating;
 }
