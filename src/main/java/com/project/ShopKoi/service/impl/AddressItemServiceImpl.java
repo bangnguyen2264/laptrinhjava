@@ -79,6 +79,7 @@ public class AddressItemServiceImpl implements AddressItemService {
     }
 
     @Override
+    @Cacheable(value = "address_item_by_parent", key = "#parentId", unless = "#result == null or #result.isEmpty()")
     public List<AddressItemDto> findAllAddressItemByAddressClass(AddressClass addressClass, Long parentId) {
         return (parentId != null)
                 ? addressItemRepository.findAddressItemByAddressClassAndParentId(addressClass, parentId)

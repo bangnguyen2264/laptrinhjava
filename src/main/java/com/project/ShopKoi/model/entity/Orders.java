@@ -47,7 +47,7 @@ public class Orders extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     @ManyToOne
-    @JoinColumn(name = "deliver_id")
+    @JoinColumn(name = "deliver_id" )
     private User deliver;
     private String feedbackMessage;
     private double rating;

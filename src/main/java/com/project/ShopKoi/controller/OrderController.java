@@ -95,6 +95,11 @@ public class OrderController {
     public ResponseEntity getMyDeliverOrder() {
         return ResponseEntity.ok(orderService.getMyDeliverOrder());
     }
+    @PostMapping("/deliver/me/remove/{orderId}")
+    public ResponseEntity removeOrderFromDelivery(@PathVariable Long orderId) {
+        orderService.removeOrderFromDelivery(orderId);
+        return ResponseEntity.ok("Delivery removed successfully");
+    }
 
     @GetMapping("/me/{orderId}")
     public ResponseEntity getMyOrderById(@PathVariable Long orderId){

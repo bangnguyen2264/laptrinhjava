@@ -203,9 +203,33 @@ public class OrderServiceImpl implements OrderService {
     public List<OrdersDto> getMyDeliverOrder() {
         User user = this.getCurrentUser();
         List<Orders> ordersList = user.getDeliveryOrders();
-        log.info("Delivery orders: {}", ordersList);
         return ordersList.stream().map(OrdersDto::toDto).toList();
     }
+
+    @Override
+    public void removeOrderFromDelivery(Long id) {
+        User user = this.getCurrentUser();
+        List<Orders> ordersList = user.getDeliveryOrders();
+
+        // Tìm đơn hàng với ID cụ thể
+        Orders orderToRemove = ordersList.stream()
+                .filter(order -> order.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Order with id " + id + " not found"));
+
+        // Ngắt kết nối giữa đơn hàng và người giao hàng
+        orderToRemove.setDeliver(null);
+
+        // Xóa đơn hàng khỏi danh sách `deliveryOrders` của user hiện tại
+        ordersList.remove(orderToRemove);
+
+        // Lưu thay đổi vào cơ sở dữ liệu
+        orderRepository.save(orderToRemove);
+        userRepository.save(user);
+    }
+
+
+
 
     @Override
     public void assignDelivery(Long orderId, Long deliveryId) {
