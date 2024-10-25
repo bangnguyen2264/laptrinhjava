@@ -45,17 +45,12 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Map<String, Long> getUserStatistics() {
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new IllegalArgumentException("Role USER not found")); // Kiểm tra Role_USER
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                .orElseThrow(() -> new IllegalArgumentException("Role ADMIN not found")); // Kiểm tra Role_ADMIN
-
-        long userCount = userRepository.countByRole(userRole); // Đếm số người dùng
-        long adminCount = userRepository.countByRole(adminRole); // Đếm số admin
-
         Map<String, Long> statistics = new HashMap<>();
-        statistics.put("userCount", userCount);
-        statistics.put("adminCount", adminCount);
+        List<Role> roles = roleRepository.findAll();
+        for (Role role : roles) {
+            long count = userRepository.countByRole(role);
+            statistics.put(role.getName(), count);
+        }
 
         return statistics;
     }
