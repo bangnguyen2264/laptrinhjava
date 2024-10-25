@@ -21,7 +21,7 @@ public class UserController {
 
     @GetMapping("/info")
     public ResponseEntity<UserDto> getCurrentUser() {
-        UserDto user = userService.getInfomationUser();
+        UserDto user = userService.getInformationUser();
         return ResponseEntity.ok(user);
     }
 

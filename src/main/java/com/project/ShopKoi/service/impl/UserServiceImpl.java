@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
 
     @Override
-    public UserDto getInfomationUser() {
+    public UserDto getInformationUser() {
         User user = userRepository.findByEmail(UserUtils.getMe())
                 .orElseThrow(() -> new IllegalArgumentException("User not sign in"));
         return UserDto.toDto(user);
@@ -79,6 +79,13 @@ public class UserServiceImpl implements UserService {
                 .filter(user -> user.getRole().equals(role)) // Lọc theo vai trò
                 .map(UserDto::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+        return UserDto.toDto(user);
     }
 
 }

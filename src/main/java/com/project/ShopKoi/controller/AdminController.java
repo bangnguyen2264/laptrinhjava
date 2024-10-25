@@ -17,13 +17,17 @@ public class AdminController {
     private final AdminServiceImpl adminServiceImpl;
     private final UserServiceImpl userServiceImpl;
 
+    @GetMapping("/user-id/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userServiceImpl.getUserById(id));
+    }
 
-    @GetMapping("users")
+    @GetMapping("/users")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         return ResponseEntity.ok(userServiceImpl.getAllUsers());
     }
 
-    @GetMapping("/users/{roleName}")
+    @GetMapping("/users-role/{roleName}")
     public ResponseEntity<List<UserDto>> getUsersByRole(@PathVariable String roleName) {
         List<UserDto> users = userServiceImpl.getAllUsersByRole(roleName);
         return ResponseEntity.ok(users);
