@@ -176,9 +176,9 @@ public class OrderServiceImpl implements OrderService {
         double weight = ordersForm.getWeight();
 
         // Tạo bảng giá cho từng phương thức vận chuyển
-        PriceTableDto airTransport = calculatePriceForMethod(TransportMethod.AIR, distance, quantity);
-        PriceTableDto seaTransport = calculatePriceForMethod(TransportMethod.SEA, distance, quantity);
-        PriceTableDto landTransport = calculatePriceForMethod(TransportMethod.LAND, distance, quantity);
+        PriceTableDto airTransport = calculatePriceForMethod(TransportMethod.AIR, distance, quantity, weight);
+        PriceTableDto seaTransport = calculatePriceForMethod(TransportMethod.SEA, distance, quantity, weight);
+        PriceTableDto landTransport = calculatePriceForMethod(TransportMethod.LAND, distance, quantity, weight);
 
         // Trả về danh sách bảng giá
         return List.of(airTransport, seaTransport, landTransport);
@@ -251,7 +251,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-    private PriceTableDto calculatePriceForMethod(TransportMethod method, double distance, int quantity) {
+    private PriceTableDto calculatePriceForMethod(TransportMethod method, double distance, double quantity, double weight) {
         // Tính phí vận chuyển dựa trên phương thức
         double costPerKm = switch (method) {
             case AIR -> ShipFee.AIR_RATE_PER_KM;
@@ -259,8 +259,11 @@ public class OrderServiceImpl implements OrderService {
             case LAND -> ShipFee.LAND_RATE_PER_KM;
         };
 
-        // Tính phí cơ bản dựa trên khoảng cách và số lượng
-        double baseCost = (distance * costPerKm) * quantity;
+        // Tính số kg hàng hóa (giá theo costPerKm với mỗi 10kg hàng hóa)
+        double weightFactor = weight/ 10.0;
+
+        // Tính tổng phí dựa trên số lượng, khối lượng và khoảng cách
+        double baseCost = (distance * costPerKm * weightFactor) * quantity;
 
         // Tính tổng phí trước VAT
         double totalCostBeforeVAT = baseCost + ShipFee.ADDITIONAL_SERVICE_FEE;

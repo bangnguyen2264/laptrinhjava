@@ -16,7 +16,6 @@ public class ShipFee {
     public static double calculate(Orders order) {
         // Tính khoảng cách giữa địa chỉ gốc và địa chỉ đích
         double distance = calculateDistance(order.getOrigin(), order.getDestination());
-        System.out.println("Distance: " + distance);
 
         // Tính phí vận chuyển theo phương thức
         double costPerKm = switch (order.getMethod()) {
@@ -24,30 +23,24 @@ public class ShipFee {
             case SEA -> SEA_RATE_PER_KM;
             case LAND -> LAND_RATE_PER_KM;
         };
-        System.out.println("Cost per km: " + costPerKm);
 
         // Tính số kg hàng hóa (giá theo costPerKm với mỗi 10kg hàng hóa)
         double weightFactor = order.getWeight() / 10.0; // Làm tròn lên số kg hàng hóa chia cho 10
-        System.out.println("Weight Factor: " + weightFactor);
 
         // Tính tổng phí dựa trên số lượng, khối lượng và khoảng cách
         double baseCost = (distance * costPerKm * weightFactor) * order.getQuantity();
-        System.out.println("Base Cost: " + baseCost);
 
         // Tính tổng phí trước VAT
         double totalCostBeforeVAT = baseCost + ADDITIONAL_SERVICE_FEE;
-        System.out.println("Total Cost Before VAT: " + totalCostBeforeVAT);
 
         // Tính phí VAT 8%
         double vat = totalCostBeforeVAT * 0.08;
-        System.out.println("VAT: " + vat);
 
         // Tổng phí bao gồm VAT
         double totalCost = totalCostBeforeVAT + vat;
 
         // Làm tròn tổng phí cuối cùng
         totalCost = Math.floor(totalCost);
-        System.out.println("Total Cost: " + totalCost); // Trả về tổng phí đã được làm tròn
 
         return totalCost;
     }
