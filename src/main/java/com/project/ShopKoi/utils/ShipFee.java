@@ -24,27 +24,28 @@ public class ShipFee {
             case LAND -> LAND_RATE_PER_KM;
         };
 
+        // Tính số kg hàng hóa (giá theo costPerKm với mỗi 10kg hàng hóa)
+        double weightFactor = order.getWeight() / 10.0; // Làm tròn lên số kg hàng hóa chia cho 10
+
         // Tính tổng phí dựa trên số lượng, khối lượng và khoảng cách
-        double baseCost = (distance * costPerKm) * order.getQuantity();
+        double baseCost = (distance * costPerKm * weightFactor) * order.getQuantity();
 
         // Tính tổng phí trước VAT
         double totalCostBeforeVAT = baseCost + ADDITIONAL_SERVICE_FEE;
 
-        // Làm tròn tổng phí trước VAT
-        totalCostBeforeVAT = Math.floor(totalCostBeforeVAT);
-
         // Tính phí VAT 8%
         double vat = totalCostBeforeVAT * 0.08;
-
-        // Làm tròn VAT
-        vat = Math.floor(vat);
 
         // Tổng phí bao gồm VAT
         double totalCost = totalCostBeforeVAT + vat;
 
         // Làm tròn tổng phí cuối cùng
-        return Math.floor(totalCost); // Trả về tổng phí đã được làm tròn
+        totalCost = Math.floor(totalCost);
+
+        return totalCost;
     }
+
+
 
     public static double calculateDistance(Address origin, Address destination) {
         double lat1 = Math.toRadians(origin.getLatitude());

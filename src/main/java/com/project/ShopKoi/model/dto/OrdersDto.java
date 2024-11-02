@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -23,7 +24,7 @@ public class OrdersDto implements Serializable {
     private String method;
     private String origin;
     private String destination;
-    private double price;
+    private BigDecimal price;
     private String note;
 
     public static OrdersDto toDto(Orders orders) {
@@ -37,7 +38,7 @@ public class OrdersDto implements Serializable {
                 .method(orders.getMethod().toString())
                 .origin(orders.getOrigin().toString())
                 .destination(orders.getDestination().toString())
-                .price(orders.getPrice())
+                .price(BigDecimal.valueOf(orders.getPrice()))
                 .note(orders.getNote())
                 .build();
     }
