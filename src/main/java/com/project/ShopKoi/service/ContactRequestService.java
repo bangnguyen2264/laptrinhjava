@@ -1,15 +1,16 @@
 package com.project.ShopKoi.service;
 
+import com.project.ShopKoi.model.dto.ContactRequestDto;
 import com.project.ShopKoi.model.entity.ContactRequest;
+import com.project.ShopKoi.model.form.ContactRequestForm;
 
 import java.util.List;
 
 public interface ContactRequestService {
 
-    ContactRequest addContactRequest(ContactRequest contactRequest);
-    ContactRequest updateContactRequest(ContactRequest contactRequest);
+    String addContactRequest(ContactRequestForm contactRequest);
     void deleteContactRequest(Long id);
-    ContactRequest getContactRequest(Long id);
-    List<ContactRequest> getAllContactRequests();
+    ContactRequestDto getContactRequest(Long id);
+    List<ContactRequestDto> getAllContactRequests(int page, int size);
 
 }

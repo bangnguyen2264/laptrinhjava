@@ -52,6 +52,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/**").authenticated()
                         // Cấu hình quyền cho Admin
                         .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN") // Chỉ Admin có quyền truy cập các API admin
+                        //Cấu hình quyền quản lý yêu cầu liên hệ
+                        .requestMatchers(HttpMethod.POST, "/api/v1/contact").permitAll() // Cho phép mọi người tạo yêu cầu liên hệ
+                        .requestMatchers(HttpMethod.GET, "/api/v1/contact/**").hasAnyAuthority("ROLE_ADMIN") // Chỉ Admin có thể xem các yêu cầu liên hệ
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/contact/**").hasAnyAuthority("ROLE_ADMIN") // Chỉ Admin có thể xóa các yêu cầu liên hệ
                         // Các yêu cầu còn lại yêu cầu xác thực
                         .anyRequest().authenticated()
                 )
