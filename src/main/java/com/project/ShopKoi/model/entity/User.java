@@ -30,10 +30,14 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
     private String phone;
-    private String address;
     private String password;
     @ManyToOne(fetch = FetchType.EAGER)
     private Role role;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Orders> orders;
+    @OneToMany(mappedBy = "deliver", cascade = CascadeType.ALL)
+    private List<Orders> deliveryOrders;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

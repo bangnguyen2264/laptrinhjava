@@ -4,9 +4,11 @@ import com.project.ShopKoi.model.entity.User;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @Builder
-public class AuthDto {
+public class AuthDto implements Serializable {
     private Long id;
     private String token;
     private String refreshToken;

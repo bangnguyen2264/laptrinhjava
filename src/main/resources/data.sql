@@ -1,0 +1,123 @@
+-- INSERT INTO address_item (name, address_class) VALUES
+--                                                    ('Việt Nam', 'COUNTRY'),
+--                                                    ('Nhật Bản', 'COUNTRY');
+-- -- Lấy id của quốc gia Việt Nam
+-- SELECT id INTO @vietnamId FROM address_item WHERE name = 'Việt Nam';
+--
+-- -- Thêm 10 thành phố của Việt Nam
+-- INSERT INTO address_item (name, address_class, parent_id,) VALUES
+--                                                               ('Hà Nội', 'CITY', @vietnamId),
+--                                                               ('Hồ Chí Minh', 'CITY', @vietnamId),
+--                                                               ('Đà Nẵng', 'CITY', @vietnamId),
+--                                                               ('Hải Phòng', 'CITY', @vietnamId),
+--                                                               ('Cần Thơ', 'CITY', @vietnamId),
+--                                                               ('Huế', 'CITY', @vietnamId),
+--                                                               ('Nha Trang', 'CITY', @vietnamId),
+--                                                               ('Vũng Tàu', 'CITY', @vietnamId),
+--                                                               ('Đà Lạt', 'CITY', @vietnamId),
+--                                                               ('Quy Nhơn', 'CITY', @vietnamId);
+-- -- Lấy id của quốc gia Nhật Bản
+-- SELECT id INTO @japanId FROM address_item WHERE name = 'Nhật Bản';
+--
+-- -- Thêm 10 thành phố của Nhật Bản
+-- INSERT INTO address_item (name, address_class, parent_id) VALUES
+--                                                               ('Tokyo', 'CITY', @japanId),
+--                                                               ('Osaka', 'CITY', @japanId),
+--                                                               ('Kyoto', 'CITY', @japanId),
+--                                                               ('Yokohama', 'CITY', @japanId),
+--                                                               ('Sapporo', 'CITY', @japanId),
+--                                                               ('Nagoya', 'CITY', @japanId),
+--                                                               ('Kobe', 'CITY', @japanId),
+--                                                               ('Fukuoka', 'CITY', @japanId),
+--                                                               ('Hiroshima', 'CITY', @japanId),
+--                                                               ('Nagasaki', 'CITY', @japanId);
+--
+-- -- Lấy id của thành phố Hà Nội
+-- SELECT id INTO @hanoiId FROM address_item WHERE name = 'Hà Nội';
+--
+-- -- Thêm các quận/huyện của Hà Nội
+-- INSERT INTO address_item (name, address_class, parent_id, longitude, latitude) VALUES
+--                                                                                    ('Quận Hoàn Kiếm', 'DISTRICT', @hanoiId, 21.0285, 105.8542),
+--                                                                                    ('Quận Ba Đình', 'DISTRICT', @hanoiId, 21.0338, 105.8142),
+--                                                                                    ('Quận Hai Bà Trưng', 'DISTRICT', @hanoiId, 21.0050, 105.8497),
+--                                                                                    ('Quận Đống Đa', 'DISTRICT', @hanoiId, 21.0194, 105.8293),
+--                                                                                    ('Quận Tây Hồ', 'DISTRICT', @hanoiId, 21.0711, 105.8180),
+--                                                                                    ('Quận Cầu Giấy', 'DISTRICT', @hanoiId, 21.0333, 105.7906),
+--                                                                                    ('Quận Thanh Xuân', 'DISTRICT', @hanoiId, 20.9980, 105.8019),
+--                                                                                    ('Quận Hoàng Mai', 'DISTRICT', @hanoiId, 20.9712, 105.8609),
+--                                                                                    ('Quận Long Biên', 'DISTRICT', @hanoiId, 21.0346, 105.8991),
+--                                                                                    ('Huyện Thanh Trì', 'DISTRICT', @hanoiId, 20.9329, 105.8619);
+--
+--
+-- -- Lấy id của thành phố Hồ Chí Minh
+-- SELECT id INTO @hcmId FROM address_item WHERE name = 'Hồ Chí Minh';
+--
+-- -- Thêm các quận/huyện của Hồ Chí Minh
+-- INSERT INTO address_item (name, address_class, parent_id, lat, lon) VALUES
+--                                                                         ('Quận 1', 'DISTRICT', @hcmId, 10.7758, 106.7009),
+--                                                                         ('Quận 2', 'DISTRICT', @hcmId, 10.7872, 106.7497),
+--                                                                         ('Quận 3', 'DISTRICT', @hcmId, 10.7811, 106.6958),
+--                                                                         ('Quận 4', 'DISTRICT', @hcmId, 10.7646, 106.7042),
+--                                                                         ('Quận 5', 'DISTRICT', @hcmId, 10.7547, 106.6644),
+--                                                                         ('Quận 6', 'DISTRICT', @hcmId, 10.7494, 106.6356),
+--                                                                         ('Quận 7', 'DISTRICT', @hcmId, 10.7285, 106.7215),
+--                                                                         ('Quận 8', 'DISTRICT', @hcmId, 10.7249, 106.6290),
+--                                                                         ('Quận 9', 'DISTRICT', @hcmId, 10.8418, 106.8270),
+--                                                                         ('Quận 10', 'DISTRICT', @hcmId, 10.7769, 106.6672),
+--                                                                         ('Quận 11', 'DISTRICT', @hcmId, 10.7604, 106.6442),
+--                                                                         ('Quận 12', 'DISTRICT', @hcmId, 10.8769, 106.6646),
+--                                                                         ('Quận Bình Tân', 'DISTRICT', @hcmId, 10.7670, 106.6064),
+--                                                                         ('Quận Bình Thạnh', 'DISTRICT', @hcmId, 10.8063, 106.7078),
+--                                                                         ('Quận Gò Vấp', 'DISTRICT', @hcmId, 10.8380, 106.6673),
+--                                                                         ('Quận Phú Nhuận', 'DISTRICT', @hcmId, 10.7971, 106.6898),
+--                                                                         ('Quận Tân Bình', 'DISTRICT', @hcmId, 10.8017, 106.6520),
+--                                                                         ('Quận Tân Phú', 'DISTRICT', @hcmId, 10.7838, 106.6284),
+--                                                                         ('Quận Thủ Đức', 'DISTRICT', @hcmId, 10.8493, 106.7530),
+--                                                                         ('Huyện Bình Chánh', 'DISTRICT', @hcmId, 10.7043, 106.5323),
+--                                                                         ('Huyện Cần Giờ', 'DISTRICT', @hcmId, 10.4112, 106.9547),
+--                                                                         ('Huyện Củ Chi', 'DISTRICT', @hcmId, 10.9736, 106.4938),
+--                                                                         ('Huyện Hóc Môn', 'DISTRICT', @hcmId, 10.8943, 106.5940),
+--                                                                         ('Huyện Nhà Bè', 'DISTRICT', @hcmId, 10.6782, 106.7052);
+--
+--
+-- -- Lấy id của thành phố Đà Nẵng
+-- SELECT id INTO @danangId FROM address_item WHERE name = 'Đà Nẵng';
+--
+-- -- Thêm các quận/huyện của Đà Nẵng
+-- INSERT INTO address_item (name, address_class, parent_id) VALUES
+--                                                               ('Quận Hải Châu', 'DISTRICT', @danangId, 16.0544, 108.2022),
+--                                                               ('Quận Thanh Khê', 'DISTRICT', @danangId, 16.0679, 108.1900),
+--                                                               ('Quận Sơn Trà', 'DISTRICT', @danangId, 16.0936, 108.2413),
+--                                                               ('Quận Ngũ Hành Sơn', 'DISTRICT', @danangId, 16.0294, 108.2501),
+--                                                               ('Quận Liên Chiểu', 'DISTRICT', @danangId, 16.0745, 108.1497),
+--                                                               ('Quận Cẩm Lệ', 'DISTRICT', @danangId, 16.0180, 108.1876),
+--                                                               ('Huyện Hòa Vang', 'DISTRICT', @danangId, 15.9992, 108.0943);
+--
+-- -- Lấy id của thành phố Hải Phòng
+-- SELECT id INTO @haiphongId FROM address_item WHERE name = 'Hải Phòng';
+--
+-- -- Thêm các quận/huyện của Hải Phòng
+-- INSERT INTO address_item (name, address_class, parent_id) VALUES
+--                                                               ('Quận Hồng Bàng', 'DISTRICT', @haiphongId, 20.8622, 106.6771),
+--                                                               ('Quận Lê Chân', 'DISTRICT', @haiphongId, 20.8411, 106.6819),
+--                                                               ('Quận Ngô Quyền', 'DISTRICT', @haiphongId, 20.8579, 106.6880),
+--                                                               ('Quận Kiến An', 'DISTRICT', @haiphongId, 20.7952, 106.6557),
+--                                                               ('Quận Hải An', 'DISTRICT', @haiphongId, 20.8385, 106.7246),
+--                                                               ('Huyện Thủy Nguyên', 'DISTRICT', @haiphongId, 20.9375, 106.6855),
+--                                                               ('Huyện An Lão', 'DISTRICT', @haiphongId, 20.7934, 106.5842),
+--                                                               ('Huyện Vĩnh Bảo', 'DISTRICT', @haiphongId, 20.7100, 106.4603),
+--                                                               ('Huyện Tiên Lãng', 'DISTRICT', @haiphongId, 20.6674, 106.5129),
+--                                                               ('Huyện Kiến Thụy', 'DISTRICT', @haiphongId, 20.7453, 106.6397);
+--
+-- -- Lấy id của thành phố Vũng Tàu
+-- SELECT id INTO @vungtauId FROM address_item WHERE name = 'Vũng Tàu';
+--
+-- -- Thêm các quận/huyện của Vũng Tàu
+-- INSERT INTO address_item (name, address_class, parent_id) VALUES
+--                                                               ('Thành phố Vũng Tàu', 'DISTRICT', @vungtauId, 10.4114, 107.1362),
+--                                                               ('Thị xã Bà Rịa', 'DISTRICT', @vungtauId, 10.5050, 107.1742),
+--                                                               ('Huyện Châu Đức', 'DISTRICT', @vungtauId, 10.6215, 107.2075),
+--                                                               ('Huyện Xuyên Mộc', 'DISTRICT', @vungtauId, 10.6247, 107.3785),
+--                                                               ('Huyện Long Điền', 'DISTRICT', @vungtauId, 10.4775, 107.2385),
+--                                                               ('Huyện Đất Đỏ', 'DISTRICT', @vungtauId, 10.4996, 107.2767),
+--                                                               ('Huyện Tân Thành', 'DISTRICT', @vungtauId, 10.5732, 107.1222);

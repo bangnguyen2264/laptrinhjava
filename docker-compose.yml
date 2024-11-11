@@ -1,9 +1,9 @@
 version: '3.8'
 services:
   # PostgreSQL Database Service
-  koi_db:
+  db:
     image: postgres:13-alpine
-    container_name: ShopKoi_DB
+    container_name: Postgres_DB
     environment:
       POSTGRES_DB: shop-koi
       POSTGRES_USER: postgres
@@ -13,8 +13,39 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
-      - koi-network
+      - koi-network-local
+
+  # Redis Cache Service
+  cache:
+    image: redis:6-alpine
+    container_name: Redis_Cache
+    ports:
+      - "6379:6379"
+    networks:
+      - koi-network-local
+    volumes:
+      - redis_data:/data
+
+  # Backend Service
+  backend:
+    build: .
+    container_name: shopkoi_backend
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/shop-koi
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
+    networks:
+      - koi-network-local
+
+# Volume for persistent PostgreSQL and Redis storage
 volumes:
   db_data:
+  redis_data:
+
+# Define custom Docker network
 networks:
-  koi-network:
+  koi-network-local:

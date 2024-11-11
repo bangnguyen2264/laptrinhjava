@@ -13,8 +13,8 @@ import io.swagger.v3.oas.annotations.servers.Server;
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
-                        name = "Bang",
-                        email = "trbangng13@gmail.com"
+                        name = "Nguyễn Trọng Bằng",
+                        email = "ngtbang2264.dev@gmail.com"
                 ),
                 description = "OpenApi documentation ",
                 title = "OpenApi specification - Bang",
