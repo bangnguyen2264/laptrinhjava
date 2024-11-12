@@ -23,6 +23,9 @@ import com.project.ShopKoi.utils.ShipFee;
 import com.project.ShopKoi.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CachePut(value = "orders", key = "#result.id")
     public OrdersDto createOrder(OrdersForm orderForm) {
         User user = userRepository.findByEmail(UserUtils.getMe())
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -79,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(value = "orders", key = "#id")
     public OrdersDto getOrderById(Long id) {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -110,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(value = "orders", key = "#id")
     public OrdersDto getMyOrderById(Long id) {
         // Lấy thông tin người dùng đã đăng nhập hiện tại
         User currentUser = this.getCurrentUser();
@@ -126,6 +132,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @CacheEvict(value = "orders", key = "#id")
     public String deleteOrder(Long id) {
         // Tìm đơn hàng theo id
         Orders order = orderRepository.findById(id)
@@ -149,6 +156,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Cacheable(value = "orders", key = "#id")
     public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
 
         Orders order = orderRepository.findById(id)
@@ -185,6 +193,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(value = "orders", key = "#id")
     public void sendFeedback(Long id, FeedbackForm feedbackForm) {
 
         Orders order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
@@ -207,6 +216,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(value = "orders", key = "#id")
     public void removeOrderFromDelivery(Long id) {
         User user = this.getCurrentUser();
         List<Orders> ordersList = user.getDeliveryOrders();
@@ -232,6 +242,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Cacheable(value = "orders", key = "#orderId")
     public void assignDelivery(Long orderId, Long deliveryId) {
         User deliver = userRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException("Delivery order not found"));
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
@@ -248,6 +259,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(value = "orders", key = "#orderId")
     public void updateDelivery(Long orderId, Long deliveryId) {
         // Lấy thông tin nhân viên giao hàng mới
         User newDeliver = userRepository.findById(deliveryId)
