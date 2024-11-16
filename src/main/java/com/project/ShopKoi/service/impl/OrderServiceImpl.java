@@ -193,7 +193,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Cacheable(value = "orders", key = "#id")
     public void sendFeedback(Long id, FeedbackForm feedbackForm) {
 
         Orders order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
@@ -205,7 +204,9 @@ public class OrderServiceImpl implements OrderService {
             order.setFeedbackMessage(feedbackForm.getFeedbackMessage());
             orderRepository.save(order);
         }
-    throw new BadRequestException("The order does not completed");
+        else {
+            throw new BadRequestException("The order does not completed");
+        }
     }
 
     @Override
@@ -216,7 +217,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Cacheable(value = "orders", key = "#id")
     public void removeOrderFromDelivery(Long id) {
         User user = this.getCurrentUser();
         List<Orders> ordersList = user.getDeliveryOrders();
