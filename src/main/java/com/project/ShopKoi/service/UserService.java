@@ -11,7 +11,7 @@ public interface UserService {
     UserDto getInfomationUser();
     UserDto updateInformationUser ( UpdateInformationUserForm form);
     String updatePassword(UpdatePasswordForm form);
-    public List<UserDto> getAllUsers();
+    public List<UserDto> getAllUsers(int page, int size);
     public List<UserDto> getAllUsersByRole(String roleName);
 
 }

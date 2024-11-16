@@ -10,6 +10,8 @@ import com.project.ShopKoi.repository.UserRepository;
 import com.project.ShopKoi.service.UserService;
 import com.project.ShopKoi.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,13 +37,9 @@ public class UserServiceImpl implements UserService {
     public UserDto updateInformationUser( UpdateInformationUserForm form) {
         User user = userRepository.findByEmail(UserUtils.getMe())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if (form.getFullName() != null) {
-            user.setFullName(form.getFullName());
-        }
-        if (form.getPhone() != null) {
-            user.setPhone(form.getPhone());
-        }
-
+        user.setFullName(form.getFullName());
+        user.setDob(form.getDob());
+        user.setPhone(form.getPhone());
         userRepository.save(user);
         return UserDto.toDto(user);
     }
@@ -64,8 +62,9 @@ public class UserServiceImpl implements UserService {
         return "Password changed successfully";
     }
     @Override
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream()
+    public List<UserDto> getAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable).stream()
                 .map(UserDto::toDto)
                 .collect(Collectors.toList());
     }
