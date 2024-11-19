@@ -156,7 +156,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    @Cacheable(value = "orders", key = "#id")
+    @CachePut(value = "orders", key = "#id")
     public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
 
         Orders order = orderRepository.findById(id)
@@ -242,7 +242,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    @Cacheable(value = "orders", key = "#orderId")
+    @Cacheable(value = "orders", key = "#orderId", unless = "#result == null")
     public void assignDelivery(Long orderId, Long deliveryId) {
         User deliver = userRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException("Delivery order not found"));
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
