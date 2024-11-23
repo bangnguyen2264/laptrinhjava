@@ -5,8 +5,10 @@ import com.project.ShopKoi.model.form.UpdateInformationUserForm;
 import com.project.ShopKoi.model.form.UpdatePasswordForm;
 import com.project.ShopKoi.service.AuthService;
 import com.project.ShopKoi.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +28,13 @@ public class UserController {
     }
 
     @PostMapping("/update-info")
-    public ResponseEntity<UserDto> updateUserInfo(@RequestBody UpdateInformationUserForm updateInformationUserForm) {
+    public ResponseEntity<UserDto> updateUserInfo(@RequestBody @Valid UpdateInformationUserForm updateInformationUserForm) {
         UserDto updatedUser = userService.updateInformationUser(updateInformationUserForm);
         return ResponseEntity.ok(updatedUser);
     }
 
     @PatchMapping("/update-password")
-    public ResponseEntity<String> updateUserPassword(@RequestBody UpdatePasswordForm updatePasswordForm) {
+    public ResponseEntity<String> updateUserPassword(@RequestBody @Valid UpdatePasswordForm updatePasswordForm) {
         String responseMessage = userService.updatePassword(updatePasswordForm);
         return ResponseEntity.ok(responseMessage);
     }

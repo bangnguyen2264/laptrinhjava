@@ -10,7 +10,8 @@ public interface UserService {
     UserDto getInformationUser();
     UserDto updateInformationUser ( UpdateInformationUserForm form);
     String updatePassword(UpdatePasswordForm form);
-    List<UserDto> getAllUsers();
     List<UserDto> getAllUsersByRole(String roleName);
     UserDto getUserById(Long id);
+    List<UserDto> getAllUsers(int page, int size);
+
 }

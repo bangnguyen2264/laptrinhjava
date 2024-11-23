@@ -79,15 +79,13 @@ public class OrderController {
     // Gán đơn hàng cho nhân viên giao hàng
     @PostMapping("/deliver/{orderId}")
     public ResponseEntity assignDelivery(@PathVariable Long orderId, @RequestParam Long deliveryId) {
-        orderService.assignDelivery(orderId, deliveryId);
-        return ResponseEntity.ok("Delivery assigned successfully");
+        return ResponseEntity.ok(orderService.assignDelivery(orderId, deliveryId));
     }
 
     // Cập nhật nhân viên giao hàng cho đơn hàng
     @PutMapping("/deliver/update/{orderId}")
     public ResponseEntity updateDelivery(@PathVariable Long orderId, @RequestParam Long deliveryId) {
-        orderService.updateDelivery(orderId, deliveryId);
-        return ResponseEntity.ok("Delivery updated successfully");
+        return ResponseEntity.ok(orderService.updateDelivery(orderId, deliveryId));
     }
 
     // Lấy tất cả đơn hàng của người giao hàng

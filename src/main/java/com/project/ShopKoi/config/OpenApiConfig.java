@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 ),
                 description = "OpenApi documentation ",
                 title = "OpenApi specification - Bang",
-                version = "1.0",
+                version = "1.1",
                 license = @License(
                         name = "Licence name",
                         url = "https://some-url.com"

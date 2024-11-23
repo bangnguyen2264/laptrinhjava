@@ -23,8 +23,10 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        return ResponseEntity.ok(userServiceImpl.getAllUsers());
+    public ResponseEntity<List<UserDto>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size    ) {
+        return ResponseEntity.ok(userServiceImpl.getAllUsers(page, size));
     }
 
     @GetMapping("/users-role/{roleName}")
