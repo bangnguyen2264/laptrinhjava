@@ -22,8 +22,8 @@ public interface OrderService {
     void sendFeedback(Long id, FeedbackForm feedbackForm);
     List<OrdersDto> getMyDeliverOrder();
     void removeOrderFromDelivery(Long id);
-    void assignDelivery(Long orderId, Long deliveryId);
-    void updateDelivery(Long orderId, Long deliveryId);
+    String assignDelivery(Long orderId, Long deliveryId);
+    String updateDelivery(Long orderId, Long deliveryId);
 
 
 

@@ -26,7 +26,6 @@ public class OrdersForm implements Serializable {
     private AddressForm destination;
     @NotNull
     private TransportMethod method;
-    @NotBlank
     private String note;
 
 }

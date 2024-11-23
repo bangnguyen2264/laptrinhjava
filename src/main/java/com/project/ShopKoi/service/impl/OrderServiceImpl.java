@@ -23,6 +23,9 @@ import com.project.ShopKoi.utils.ShipFee;
 import com.project.ShopKoi.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CachePut(value = "orders", key = "#result.id")
     public OrdersDto createOrder(OrdersForm orderForm) {
         User user = userRepository.findByEmail(UserUtils.getMe())
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -55,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
         Address destination = createOrGetAddress(orderForm.getDestination());
         log.info("Destination address: {}", destination);
         // Build the order
-        Orders orders = buildOrders(orderForm,origin,destination,user);
+        Orders orders = buildOrders(orderForm, origin, destination, user);
         orders.setPrice(ShipFee.calculate(orders));
         orderRepository.save(orders);
         user.getOrders().add(orders);
@@ -79,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(value = "orders", key = "#id")
     public OrdersDto getOrderById(Long id) {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -89,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
     public OrdersDto getOrderByOrderNumber(UUID orderNumber) {
         Orders orders = orderRepository
                 .findByOrderNumber(orderNumber)
-                .orElseThrow(()-> new NotFoundException("Order with order number " + orderNumber + " not found"));
+                .orElseThrow(() -> new NotFoundException("Order with order number " + orderNumber + " not found"));
         return OrdersDto.toDto(orders);
     }
 
@@ -110,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(value = "orders", key = "#id")
     public OrdersDto getMyOrderById(Long id) {
         // Lấy thông tin người dùng đã đăng nhập hiện tại
         User currentUser = this.getCurrentUser();
@@ -126,29 +132,29 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @CacheEvict(value = "orders", key = "#id")
     public String deleteOrder(Long id) {
         // Tìm đơn hàng theo id
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
-        if(this.checkAuthorization(order)) {
-            // Kiểm tra trạng thái đơn hàng
-            if (order.getStatus() != OrderStatus.PENDING) {
-                throw new BadRequestException("Only orders with PENDING status can be deleted");
-            }
-            // Xóa tham chiếu đến địa chỉ nếu muốn (không bắt buộc)
-            order.setOrigin(null);
-            order.setDestination(null);
-            // Xóa đơn hàng nhưng giữ lại địa chỉ
-            orderRepository.delete(order);
-
-            return "Deleted Order Successfully";
+        // Kiểm tra trạng thái đơn hàng
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new BadRequestException("Only orders with PENDING status can be deleted");
         }
-        throw new IllegalArgumentException("User is not authorized to delete this order");
+        // Xóa tham chiếu đến địa chỉ nếu muốn (không bắt buộc)
+        order.setOrigin(null);
+        order.setDestination(null);
+        // Xóa đơn hàng nhưng giữ lại địa chỉ
+        orderRepository.delete(order);
+
+        return "Deleted Order Successfully";
     }
 
 
 
+
     @Override
+    @CachePut(value = "orders", key = "#id", unless = "#result == null" )
     public OrdersDto changeStatusOrder(Long id, OrderStatus status) {
 
         Orders order = orderRepository.findById(id)
@@ -196,7 +202,9 @@ public class OrderServiceImpl implements OrderService {
             order.setFeedbackMessage(feedbackForm.getFeedbackMessage());
             orderRepository.save(order);
         }
-    throw new BadRequestException("The order does not completed");
+        else {
+            throw new BadRequestException("The order does not completed");
+        }
     }
 
     @Override
@@ -232,7 +240,8 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public void assignDelivery(Long orderId, Long deliveryId) {
+    @CachePut(value = "orders", key = "#orderId", unless = "#result == null")
+    public String assignDelivery(Long orderId, Long deliveryId) {
         User deliver = userRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException("Delivery order not found"));
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
         if (order.getDeliver() == null && !deliver.getDeliveryOrders().contains(order))
@@ -241,6 +250,7 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.save(order);
             deliver.getDeliveryOrders().add(order);
             userRepository.save(deliver);
+            return "Delivery assigned successfully";
         }
         else {
             throw new BadRequestException("Delivery order already assigned");
@@ -248,7 +258,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updateDelivery(Long orderId, Long deliveryId) {
+    @CachePut(value = "orders", key = "#orderId", unless = "#result == null")
+    public String updateDelivery(Long orderId, Long deliveryId) {
         // Lấy thông tin nhân viên giao hàng mới
         User newDeliver = userRepository.findById(deliveryId)
                 .orElseThrow(() -> new NotFoundException("Delivery order not found"));
@@ -259,19 +270,25 @@ public class OrderServiceImpl implements OrderService {
 
         // Kiểm tra xem đơn hàng đã được gán cho nhân viên giao hàng nào chưa
         User currentDeliver = order.getDeliver();
-
+        if (newDeliver.equals(currentDeliver)) {
+            throw new BadRequestException("Delivery order already assigned");
+        }
         if (currentDeliver != null) {
             // Nếu đơn hàng đã có nhân viên giao hàng cũ, loại bỏ đơn hàng khỏi danh sách của họ
             currentDeliver.getDeliveryOrders().remove(order);
             userRepository.save(currentDeliver); // Cập nhật thông tin nhân viên giao hàng cũ
+            // Gán đơn hàng cho nhân viên giao hàng mới
+            order.setDeliver(newDeliver);
+            orderRepository.save(order);
+
+            newDeliver.getDeliveryOrders().add(order);
+            userRepository.save(newDeliver);
+            return "Delivery updated successfully";
+        }
+        else {
+            throw new BadRequestException("Order with id " + orderId + " did not have a delivery staff");
         }
 
-        // Gán đơn hàng cho nhân viên giao hàng mới
-        order.setDeliver(newDeliver);
-        orderRepository.save(order);
-
-        newDeliver.getDeliveryOrders().add(order);
-        userRepository.save(newDeliver);
     }
 
 
@@ -359,17 +376,12 @@ public class OrderServiceImpl implements OrderService {
         return userRepository.findByEmail(UserUtils.getMe()).orElseThrow(() -> new IllegalArgumentException("User not sign in"));
     }
 
-    private boolean checkAuthorization(Orders order) {
-        // Lấy người dùng hiện tại
-        User currentUser = this.getCurrentUser();
-        return currentUser.getRole().getName().equals("ROLE_ADMIN") || currentUser.getRole().getName().equals("ROLE_DELIVER");
-    }
     private boolean checkCurrentUser(Orders order) {
         User currentUser = this.getCurrentUser();
         return order.getUser().equals(currentUser) ;
     }
     private boolean checkDeliver(Orders orders){
         User currentUser = this.getCurrentUser();
-        return orders.getDeliver().equals(currentUser);
+        return orders.getDeliver().equals(currentUser) || currentUser.getRole().getName().equals("ROLE_ADMIN");
     }
 }
